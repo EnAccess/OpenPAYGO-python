@@ -148,6 +148,7 @@ elif token_type == TokenType.INVALID:
 
 ## Changelog
 
-### 2023-10-03 - v0.1.7
+### 2023-10-03 - v0.2.0
 - First working version published on PyPI
-- Setup CI for pushing to PyPI
+- Has support for OpenPAYGO Token
+- Has working CI for pushing to PyPI
