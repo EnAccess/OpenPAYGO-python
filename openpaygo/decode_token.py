@@ -8,7 +8,7 @@ class OpenPAYGOTokenDecoder(object):
     MAX_UNUSED_OLDER_TOKENS = 8*2
 
     @classmethod
-    def decode_token(cls, token, secret_key, last_count, used_counts=None, starting_code=None, value_divider=1, restricted_digit_set=False):
+    def decode_token(cls, token, secret_key, count, used_counts=None, starting_code=None, value_divider=1, restricted_digit_set=False):
         secret_key = OpenPAYGOTokenShared.load_secret_key_from_hex(secret_key)
         if not starting_code:
             # We generate the starting code from the key if not provided
@@ -28,9 +28,9 @@ class OpenPAYGOTokenDecoder(object):
             else:
                 raise ValueError("Token is too long")
         if not extended_token:
-            value, token_type, count, updated_counts = cls.get_activation_value_count_and_type_from_token(token, starting_code, secret_key, last_count, restricted_digit_set, used_counts)
+            value, token_type, count, updated_counts = cls.get_activation_value_count_and_type_from_token(token, starting_code, secret_key, count, restricted_digit_set, used_counts)
         else:
-            value, token_type, count, updated_counts = cls.get_activation_value_count_from_extended_token(token, starting_code, secret_key, last_count, restricted_digit_set, used_counts)
+            value, token_type, count, updated_counts = cls.get_activation_value_count_from_extended_token(token, starting_code, secret_key, count, restricted_digit_set, used_counts)
         if value and value_divider:
             value = value / value_divider
         return value, token_type, count, updated_counts
