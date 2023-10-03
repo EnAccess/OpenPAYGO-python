@@ -148,6 +148,6 @@ elif token_type == TokenType.INVALID:
 
 ## Changelog
 
-### 2023-10-03 - v0.1.3
+### 2023-10-03 - v0.1.7
 - First working version published on PyPI
 - Setup CI for pushing to PyPI
