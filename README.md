@@ -22,14 +22,15 @@ This open-source project was sponsored by:
 ## Table of Contents
 
   - [Installing the library](#installing-the-library)
-  - [Getting Started - Generating Token](#getting-started---generating-token)
+  - [Getting Started - Generating Tokens](#getting-started---generating-tokens)
+  - [Getting Started - Decoding a Token](#getting-started---decoding-a-token)
 
 
 ## Installing the library
 
 You can install the library by running `pip install openpaygo` or adding `openpaygo` in your requirements.txt file and running `pip install -r requirements.txt`. 
 
-## Getting Started - Generating Token
+## Getting Started - Generating Tokens
 
 You can use the `generate_token()` function to generate an OpenPAYGOToken Token. The function takes the following parameters, and they should match the configuration in the hardware of the device: 
 
@@ -48,7 +49,7 @@ The function returns the `updated_count` as a number as well as the `token` as a
 **Example 1 - Add 7 days:**
 
 ```
-from openpaygo.optoken import generate_token
+from openpaygo import generate_token
 from myexampleproject import device_getter
 
 # We get a device with the parameters we need from our database, this will be specific to your project
@@ -68,7 +69,7 @@ device.save() # We save the new count that we set for the device
 **Example 2 - Disable PAYG (unlock forever):**
 
 ```
-from openpaygo.optoken import generate_token, TokenType
+from openpaygo import generate_token, TokenType
 
 ...
 
@@ -109,7 +110,7 @@ The function will raise a `ValueError` if the key is in the wrong format, but wi
 **Example:**
 
 ```
-from openpaygo.optoken import decode_token
+from openpaygo import decode_token
 
 # We assume the users enters a token and that the device state is saved in my_device_state
 ...
@@ -138,8 +139,14 @@ elif token_type == TokenType.DISABLE_PAYG:
   my_device_state.unlocked_forever = True
 elif token_type == TokenType.COUNTER_SYNC:
   print('Counter Synced')
-if token_type == TokenType.ALREADY_USED:
+elif token_type == TokenType.ALREADY_USED:
   print('Token was already used')
 elif token_type == TokenType.INVALID:
   print('Token is invalid')
 ```
+
+
+## Changelog
+
+### 2023-10-03 - v0.1.2
+- First working version published on PyPi

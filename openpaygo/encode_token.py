@@ -1,5 +1,5 @@
-from shared import OpenPAYGOTokenShared, TokenType
-from shared_extended import OpenPAYGOTokenSharedExtended
+from .shared import OpenPAYGOTokenShared, TokenType
+from .shared_extended import OpenPAYGOTokenSharedExtended
 
 
 class OpenPAYGOTokenEncoder(object):
