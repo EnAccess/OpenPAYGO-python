@@ -1,5 +1,15 @@
 import siphash
 import struct
+import codecs
+
+
+class TokenType(object):
+    ADD_TIME = 1
+    SET_TIME = 2
+    DISABLE_PAYG = 3
+    COUNTER_SYNC = 4
+    INVALID = 10
+    ALREADY_USED = 11
 
 
 class OpenPAYGOTokenShared(object):
@@ -8,8 +18,6 @@ class OpenPAYGOTokenShared(object):
     PAYG_DISABLE_VALUE = 998
     COUNTER_SYNC_VALUE = 999
     TOKEN_VALUE_OFFSET = 1000
-    TOKEN_TYPE_SET_TIME = 1
-    TOKEN_TYPE_ADD_TIME = 2
 
     @classmethod
     def get_token_base(cls, code):
@@ -37,6 +45,19 @@ class OpenPAYGOTokenShared(object):
         result_hash = hi_hash ^ lo_hash # We XOR the two together to get a single 32bits INT
         token = cls._convert_to_29_5_bits(result_hash) # We convert the 32bits value to an INT no greater than 9 digits
         return token
+    
+    @classmethod
+    def generate_starting_code(cls, key):
+        # We make a hash of the key
+        starting_hash = OpenPAYGOTokenShared.generate_hash(key, key)
+        return OpenPAYGOTokenShared.convert_hash_to_token(starting_hash)
+    
+    @classmethod
+    def load_secret_key_from_hex(cls, secret_key):
+        try:
+            return codecs.decode(secret_key, 'hex')
+        except Exception as e:
+            raise ValueError('The secret key provided is not correctly formatted, it should be 32 hexadecimal characters. ')
 
     @classmethod
     def _convert_to_29_5_bits(cls, source):
