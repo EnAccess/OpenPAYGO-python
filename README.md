@@ -1,4 +1,4 @@
-# OpenPAYGOToken - Python Lib
+# OpenPAYGO - Python Lib
 
 This repository contains the Python library for using implementing the different OpenPAYGOToken Suite technologies on your server (for generating tokens and decoding openpaygo metrics payloads) or device (for decoding tokens and making openpaygo metrics payloads).  
 
@@ -30,7 +30,9 @@ This open-source project was sponsored by:
 
 You can install the library by running `pip install openpaygo` or adding `openpaygo` in your requirements.txt file and running `pip install -r requirements.txt`. 
 
-## Getting Started - Generating Tokens
+## Getting Started - OpenPAYGO Token
+
+### Generating Tokens
 
 You can use the `generate_token()` function to generate an OpenPAYGOToken Token. The function takes the following parameters, and they should match the configuration in the hardware of the device: 
 
@@ -48,7 +50,7 @@ The function returns the `updated_count` as a number as well as the `token` as a
 
 **Example 1 - Add 7 days:**
 
-```
+```python
 from openpaygo import generate_token
 from myexampleproject import device_getter
 
@@ -68,7 +70,7 @@ device.save() # We save the new count that we set for the device
 
 **Example 2 - Disable PAYG (unlock forever):**
 
-```
+```python
 from openpaygo import generate_token, TokenType
 
 ...
@@ -85,7 +87,7 @@ device.save() # We save the new count that we set for the device
 ```
 
 
-## Getting Started - Decoding a Token
+### Decoding Tokens
 
 You can use the `decode_token()` function to generate an OpenPAYGOToken Token. The function takes the following parameters, and they should match the configuration in the hardware of the device: 
 
@@ -109,7 +111,7 @@ The function will raise a `ValueError` if the key is in the wrong format, but wi
 
 **Example:**
 
-```
+```python
 from openpaygo import decode_token
 
 # We assume the users enters a token and that the device state is saved in my_device_state
@@ -136,6 +138,7 @@ elif token_type == TokenType.SET_TIME:
   my_device_state.days_remaining = value
   print(f'Set to {value} days remaining')
 elif token_type == TokenType.DISABLE_PAYG:
+  print('Unlocked Device')
   my_device_state.unlocked_forever = True
 elif token_type == TokenType.COUNTER_SYNC:
   print('Counter Synced')
