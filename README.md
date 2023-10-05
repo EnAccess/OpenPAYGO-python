@@ -21,10 +21,18 @@ This open-source project was sponsored by:
 
 ## Table of Contents
 
+  - [Key Features](#key-features)
   - [Installing the library](#installing-the-library)
-  - [Getting Started - Generating Tokens](#getting-started---generating-tokens)
-  - [Getting Started - Decoding a Token](#getting-started---decoding-a-token)
+  - [Getting Started - OpenPAYGO Token](#getting-started---openpaygo-token)
+    - [Generating Tokens](#generating-tokens)
+    - [Decoding Tokens](#decoding-tokens)
+  - [Getting Started - OpenPAYGO Metrics](#getting-started---openpaygo-metrics)
+  - [Changelog](#changelog)
+    - [2023-10-03 - v0.2.0](#2023-10-03---v020)
 
+## Key Features
+- Implements token generation and decoding with full support for the v2.3 of the [OpenPAYGO Token](https://github.com/EnAccess/OpenPAYGO-Token) specifications. 
+- Implements payload authentication (verification + signing) and conversion from simple to condensed payload (and back) with full support of the v1.0-rc1 of the [OpenPAYGO Metrics](https://github.com/openpaygo/metrics) specifications. 
 
 ## Installing the library
 
@@ -146,6 +154,70 @@ elif token_type == TokenType.ALREADY_USED:
   print('Token was already used')
 elif token_type == TokenType.INVALID:
   print('Token is invalid')
+```
+
+
+## Getting Started - OpenPAYGO Metrics
+
+
+You can use the `MetricsHandler` object to process your OpenPAYGO Metrics request from start to finish. It accepts the following initial inputs: 
+- `metrics_payload` (required): The OpenPAYGO Metrics payload, in a JSON string format. 
+- `secret_key` (optional): The secret key provided as a string containing 32 hexadecimal characters
+- `data_format` (optional): The data format, provided as dictionnary matching the data format object specifications. 
+
+It provides the following methods:
+- `get_device_serial()`: Returns the serial number of the device as a string. 
+- `set_device_parameters(secret_key, data_format)`: Used to set the device data required for proper processing of the request in the handler if it was not set initially, which is often the case as the serial number is usually required to fetch that data. It will return `ValueError` if either of the parameters is invalid. 
+- `is_auth_valid()`: Returns `true` if the authentication provided is valid or `false` if not. 
+- `get_simple_metrics()`: Returns the metrics provided in the simple expanded format. It will also convert relative timestamps into explicit timestamps for easier processing. 
+- `expects_token_answer()`: Return `true` if the payload requested tokens in the answer. You can set the tokens to be returned by calling `add_tokens_to_answer(token_list)` with `token_list` being a list of token strings. 
+- `expects_time_answer()`: Return `true` if the payload requested either relative time or absolute time in the answer. You can set the time to be returned by calling `add_time_to_answer(target_datetime)` with `target_datetime` being a datetime object. The function will automatically provide it in the correct format based on the request.  
+- `add_settings_to_answer(settings_dict)`: Will add the provided settings dictionnary to the answer. 
+- `add_extra_data_to_answer(extra_data_dict)`: Will add the provided extra data dictionnary to the answer. 
+- `get_answer()`: Will return the answer as a string based on the request and the data added to answer, it will automatically handle the authentication and fomatting. 
+
+
+**Example - Full Request flow:**
+
+```python
+from openpaygo import MetricsHandler
+from my_db_service import get_device, store_metric
+
+
+@app.route('/dd')
+def device_data():
+  # We load the metrics
+  try:
+    metrics = MetricsHandler(request.data)
+  except ValueError as e:
+    return {'error': 'Invalid data format'}, 400
+  # We get the serial number and load the device data from our storage
+  device = get_device(serial=metrics.get_device_serial())
+  # We set the device parameters in the metrics handler
+  metrics.set_device_parameters(
+    secret_key=device.secret_key,
+    data_format=device.data_format
+  )
+  # We check the authentication
+  if not metrics.is_auth_valid():
+    return {'error': 'Invalid authentication'}, 403
+  # We transform the condensed data received from the device in simple data
+  simple_data = metrics.get_simple_metrics()
+  # We store the metrics in our database
+  for metric_data in simple_data.get('data'):
+    store_metric(name=metric_data['name'], value=metric_data['value'])
+  for time_step in simple_data.get('historical_data'):
+    for historical_metric_data in time_step:
+      store_metric(name=metric_data['name'], value=metric_data['value'], time=time_step['timestamp'])
+  # We prepare the answer
+  if metrics.expects_token_answer():
+    metrics.add_tokens_to_answer(device.pending_token_list)
+  elif metrics.expects_time_answer():
+    metrics.add_time_to_answer(device.expiration_datetime)
+  # We can add extra data
+  metrics.add_settings_to_answer({'language': 'fr-FR'})
+  # The handler handles the signature, etc.
+  return metrics.get_answer(), 200
 ```
 
 
