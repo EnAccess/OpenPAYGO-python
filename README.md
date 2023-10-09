@@ -40,7 +40,7 @@ You can install the library by running `pip install openpaygo` or adding `openpa
 
 ## Getting Started - OpenPAYGO Token
 
-### Generating Tokens
+### Generating Tokens (Server Side)
 
 You can use the `generate_token()` function to generate an OpenPAYGOToken Token. The function takes the following parameters, and they should match the configuration in the hardware of the device: 
 
@@ -95,11 +95,11 @@ device.save() # We save the new count that we set for the device
 ```
 
 
-### Decoding Tokens
+### Decoding Tokens (Device Side)
 
 You can use the `decode_token()` function to generate an OpenPAYGOToken Token. The function takes the following parameters, and they should match the configuration in the hardware of the device: 
 
-- `token` (required): The token that was given by the user
+- `token` (required): The token that was given by the user, as a string
 - `secret_key` (required): The secret key of the device
 - `count` (required): The token count of the last valid token. When a device is new, this is 1. 
 - `used_counts` (optional): An array of recently used token counts, as returned by the function itself after the last valid token was decoded. This allows for handling unordered token entry. 
@@ -159,9 +159,23 @@ elif token_type == TokenType.INVALID:
 
 ## Getting Started - OpenPAYGO Metrics
 
+### Generating a Request (Device Side)
 
-You can use the `MetricsHandler` object to process your OpenPAYGO Metrics request from start to finish. It accepts the following initial inputs: 
-- `metrics_payload` (required): The OpenPAYGO Metrics payload, in a JSON string format. 
+You can use the `MetricsRequestHandler` object to create a new OpenPAYGO Metrics request from start to finish. It accepts the following initial inputs: 
+- `serial_number` (required): The serial number of the device
+- `data_format` (optional): The data format, provided as dictionnary matching the data format object specifications. 
+- `secret_key` (optional): The secret key provided as a string containing 32 hexadecimal characters. Required if `auth_method` is defined. 
+- `auth_method` (optional): One of the auth method contained in the `AuthMethod` class. 
+
+It provides the following methods:
+- `set_timestamp(timestamp)`: Used to set the `timestamp` of the request. 
+- `set_request_count(request_count)`: Used to set the `request_count` of the request. 
+
+
+### Handling a Request and Generating a Response (Server Side)
+
+You can use the `MetricsResponseHandler` object to process your OpenPAYGO Metrics request from start to finish. It accepts the following initial inputs: 
+- `metrics_payload` (required): The OpenPAYGO Metrics payload, as a string containing the JSON payload. 
 - `secret_key` (optional): The secret key provided as a string containing 32 hexadecimal characters
 - `data_format` (optional): The data format, provided as dictionnary matching the data format object specifications. 
 
@@ -222,6 +236,9 @@ def device_data():
 
 
 ## Changelog
+
+### 2023-10-09 - v0.3.0
+- Fix token generation issue
 
 ### 2023-10-03 - v0.2.0
 - First working version published on PyPI

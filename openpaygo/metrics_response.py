@@ -1,7 +1,7 @@
 import json
 
 
-class MetricsHandler(object):
+class MetricsResponseHandler(object):
 
     def __init__(self, received_metrics, data_format=None, secret_key=None):
         self.received_metrics = received_metrics
