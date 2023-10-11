@@ -21,10 +21,18 @@ This open-source project was sponsored by:
 
 ## Table of Contents
 
+  - [Key Features](#key-features)
   - [Installing the library](#installing-the-library)
-  - [Getting Started - Generating Tokens](#getting-started---generating-tokens)
-  - [Getting Started - Decoding a Token](#getting-started---decoding-a-token)
+  - [Getting Started - OpenPAYGO Token](#getting-started---openpaygo-token)
+    - [Generating Tokens](#generating-tokens)
+    - [Decoding Tokens](#decoding-tokens)
+  - [Getting Started - OpenPAYGO Metrics](#getting-started---openpaygo-metrics)
+  - [Changelog](#changelog)
+    - [2023-10-03 - v0.2.0](#2023-10-03---v020)
 
+## Key Features
+- Implements token generation and decoding with full support for the v2.3 of the [OpenPAYGO Token](https://github.com/EnAccess/OpenPAYGO-Token) specifications. 
+- Implements payload authentication (verification + signing) and conversion from simple to condensed payload (and back) with full support of the v1.0-rc1 of the [OpenPAYGO Metrics](https://github.com/openpaygo/metrics) specifications. 
 
 ## Installing the library
 
@@ -32,11 +40,11 @@ You can install the library by running `pip install openpaygo` or adding `openpa
 
 ## Getting Started - OpenPAYGO Token
 
-### Generating Tokens
+### Generating Tokens (Server Side)
 
 You can use the `generate_token()` function to generate an OpenPAYGOToken Token. The function takes the following parameters, and they should match the configuration in the hardware of the device: 
 
-- `secret_key` (required): The secret key of the device. Must be passed as an hexadecimal string (with 32 characters). 
+- `secret_key` (required): The secret key of the device. Must be passed as an hexadecimal string with 32 characters (e.g. `dac86b1a29ab82edc5fbbc41ec9530f6`). 
 - `count` (required): The token count used to make the last token.
 - `value` (optional): The value to be passed in the token (typically the number of days of activation). Optional if the `token_type` is Disable PAYG or Counter Sync. The value must be between 0 and 995. 
 - `token_type` (optional): Used to set the type of token (default is Add Time). Token types can be found in the `TokenType` class: ADD_TIME, SET_TIME, DISABLE_PAYG, COUNTER_SYNC. 
@@ -87,12 +95,12 @@ device.save() # We save the new count that we set for the device
 ```
 
 
-### Decoding Tokens
+### Decoding Tokens (Device Side)
 
 You can use the `decode_token()` function to generate an OpenPAYGOToken Token. The function takes the following parameters, and they should match the configuration in the hardware of the device: 
 
-- `token` (required): The token that was given by the user
-- `secret_key` (required): The secret key of the device
+- `token` (required): The token that was given by the user, as a string
+- `secret_key` (required): The secret key of the device as a string with 32 hexadecimal characters (e.g. `dac86b1a29ab82edc5fbbc41ec9530f6`)
 - `count` (required): The token count of the last valid token. When a device is new, this is 1. 
 - `used_counts` (optional): An array of recently used token counts, as returned by the function itself after the last valid token was decoded. This allows for handling unordered token entry. 
 - `starting_code` (optional): If not provided, it is generated according to the method defined in the standard (SipHash-2-4 of the key, transformed to digit by the same method as the token generation).
@@ -149,7 +157,151 @@ elif token_type == TokenType.INVALID:
 ```
 
 
+## Getting Started - OpenPAYGO Metrics
+
+### Generating a Request (Device Side)
+
+You can use the `MetricsRequestHandler` object to create a new OpenPAYGO Metrics request from start to finish. It accepts the following initial inputs: 
+- `serial_number` (required): The serial number of the device
+- `data_format` (optional): The data format, provided as dictionnary matching the data format object specifications. 
+- `secret_key` (optional): The secret key provided as a string containing 32 hexadecimal characters (e.g. `dac86b1a29ab82edc5fbbc41ec9530f6`). Required if `auth_method` is defined. 
+- `auth_method` (optional): One of the auth method contained in the `AuthMethod` class. 
+
+It provides the following methods:
+- `set_timestamp(timestamp)`: Used to set the `timestamp` of the request. 
+- `set_request_count(request_count)`: Used to set the `request_count` of the request. 
+- `set_data(data)`: Used to set the `data` of the request, should be set in simple format as a dictionnay. 
+- `set_historical_data(data)`: Used to set the `historical_data` of the request, should be set in simple format as a dictionnary. The data is assumed to be separated by the `historical_data_interval` unless an explicit timestamp is provided. 
+- `get_simple_request_payload()`: Returns the payload in simple format as a string containing JSON and including the authentication signature. 
+- `get_condensed_request_payload()`: Returns the payload in condensed format as a string containing JSON and including the authentication signature. It requires `data_format` to be set. The data is automatically condensed from the set data and the data format and the signature is automatically generated. 
+
+
+**Example - Full Request flow from device side:**
+
+```python
+from openpaygo import MetricsRequestHandler, AuthMethod
+import requests
+
+# We assume the users enters a token and that the device state is saved in my_device_state
+...
+
+metrics_request = MetricsRequestHandler(
+      serial_number=my_device_state.serial_number,
+      secret_key=my_device_state.secret_key,
+      data_format=my_device_state.data_format,
+      auth_method=AuthMethod.RECURSIVE_DATA_AUTH
+)
+
+metrics_request.set_timestamp(1611583070)
+metrics_request.set_data({
+  "token_count": 3,
+  "tampered": False,
+  "firmware_version": "1.2.3"
+})
+# Here we assume that the data we send is separated by 60 seconds as per the data format
+metrics_request.set_historical_data([
+  {
+      "panel_voltage": 12.31,
+      "battery_voltage": 12.32,
+      "panel_current": 1.23,
+      "battery_current": -1.23,
+  },
+  {
+      "panel_voltage": 12.30,
+      "battery_voltage": 12.31,
+      "panel_current": 1.22,
+      "battery_current": -1.21,
+  }
+])
+payload = metrics_request.get_condensed_request_payload()
+
+# We can now proceed to send the payload to the URL
+# It looks something like `{"sn":"aaa111222","df":1234,"ts":1611583070,"d":[3,false,"1.2.3"],"hd":[[12.31,12.32,1.23,-1.23],[12.3,12.31,1.22,-1.21]],"a":"raa5cb1fda302cf94e"}`
+response = requests.post('https://<base_url>/dd', data=payload, headers={'Content-Type':'application/json'})
+try:
+  response.json().get('tkl', [])
+  for tokens in tkl:
+    # Here we decode the tokens received from the server and apply them (see example above)
+    ...
+```
+
+
+### Handling a Request and Generating a Response (Server Side)
+
+You can use the `MetricsResponseHandler` object to process your OpenPAYGO Metrics request from start to finish. It accepts the following initial inputs: 
+- `metrics_payload` (required): The OpenPAYGO Metrics payload, as a string containing the JSON payload. 
+- `secret_key` (optional): The secret key provided as a string containing 32 hexadecimal characters (e.g. `dac86b1a29ab82edc5fbbc41ec9530f6`)
+- `data_format` (optional): The data format, provided as dictionnary matching the data format object specifications. 
+- `last_request_count` (optional): The request count of the last valid request (used for avoiding request replay)
+- `last_request_timestamp` (optional): The timestamp of the last valid request (used for avoiding request replay)
+
+It provides the following methods:
+- `get_device_serial()`: Returns the serial number of the device as a string. 
+- `set_device_parameters(secret_key, data_format, last_request_count, last_request_timestamp)`: Used to set the device data required for proper processing of the request in the handler if it was not set initially, which is often the case as the serial number is usually required to fetch that data. It will return `ValueError` if either of the parameters is invalid. 
+- `is_auth_valid()`: Returns `true` if the authentication provided is valid or `false` if not. Note that it checks both that the signature is valid and that the `request_count` or `timestamp` are more recent than the one provided in the device parameters. 
+- `get_simple_metrics()`: Returns the metrics provided in the simple expanded format. It will also convert relative timestamps into explicit timestamps for easier processing. 
+- `expects_token_answer()`: Return `true` if the payload requested tokens in the answer. You can set the tokens to be returned by calling `add_tokens_to_answer(token_list)` with `token_list` being a list of token strings. 
+- `expects_time_answer()`: Return `true` if the payload requested either relative time or absolute time in the answer. You can set the time to be returned by calling `add_time_to_answer(target_datetime)` with `target_datetime` being a datetime object. The function will automatically provide it in the correct format based on the request.  
+- `add_settings_to_answer(settings_dict)`: Will add the provided settings dictionnary to the answer. 
+- `add_extra_data_to_answer(extra_data_dict)`: Will add the provided extra data dictionnary to the answer. 
+- `add_new_base_url_to_answer(new_base_url)`: Will tell the device to change the base URL to send the data to. 
+- `get_answer_payload()`: Will return the answer as a string based on the request and the data added to answer, it will automatically handle the authentication and fomatting. 
+
+
+**Example - Full Request flow from server side:**
+
+```python
+from openpaygo import MetricsResponseHandler
+from my_db_service import get_device, get_data_format, store_metric
+
+
+@app.route('/dd')
+def device_data():
+  # We load the metrics
+  try:
+    metrics = MetricsResponseHandler(request.data)
+  except ValueError as e:
+    return {'error': 'Invalid data format'}, 400
+  # We get the serial number and load the device data from our storage
+  device = get_device(serial=metrics.get_device_serial())
+  # We get the data format if needed from our storage
+  data_format = get_data_format(id=metrics.get_data_format_id()) if not metrics.data_format_available() else None
+  # We set the device parameters in the metrics handler
+  metrics.set_device_parameters(
+    secret_key=device.secret_key,
+    data_format=data_format
+  )
+  # We check the authentication
+  if not metrics.is_auth_valid():
+    return {'error': 'Invalid authentication'}, 403
+  # We transform the condensed data received from the device in simple data
+  simple_data = metrics.get_simple_metrics()
+  # We store the metrics in our database
+  for metric_data in simple_data.get('data'):
+    store_metric(name=metric_data['name'], value=metric_data['value'])
+  # Here the handler automatically computed the timestamp for each step
+  for time_step in simple_data.get('historical_data'):
+    for historical_metric_data in time_step:
+      store_metric(name=metric_data['name'], value=metric_data['value'], time=time_step['timestamp'])
+  # We prepare the answer
+  if metrics.expects_token_answer():
+    metrics.add_tokens_to_answer(device.pending_token_list)
+  elif metrics.expects_time_answer():
+    metrics.add_time_to_answer(device.expiration_datetime)
+  # We can add extra data
+  metrics.add_settings_to_answer({'language': 'fr-FR'})
+  # The handler handles the signature, etc.
+  return metrics.get_answer_payload(), 200
+```
+
+
 ## Changelog
+
+### 2023-10-09 - v0.3.0
+- Fix token generation issue
+- Add support for OpenPAYGO Metrics Request Generation
+- Add support for OpenPAYGO Metrics Request Decoding
+- Add support for OpenPAYGO Metrics Response Generation
 
 ### 2023-10-03 - v0.2.0
 - First working version published on PyPI

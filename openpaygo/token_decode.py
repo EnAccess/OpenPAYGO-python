@@ -1,5 +1,5 @@
-from .shared import OpenPAYGOTokenShared, TokenType
-from .shared_extended import OpenPAYGOTokenSharedExtended
+from .token_shared import OpenPAYGOTokenShared, TokenType
+from .token_shared_extended import OpenPAYGOTokenSharedExtended
 
 
 class OpenPAYGOTokenDecoder(object):
@@ -27,6 +27,7 @@ class OpenPAYGOTokenDecoder(object):
                 extended_token = True
             else:
                 raise ValueError("Token is too long")
+        token = int(token)
         if not extended_token:
             value, token_type, count, updated_counts = cls.get_activation_value_count_and_type_from_token(token, starting_code, secret_key, count, restricted_digit_set, used_counts)
         else:

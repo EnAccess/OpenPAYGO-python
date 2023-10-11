@@ -1,3 +1,4 @@
 *.pyc
 dist
 openpaygo.egg-info
+.DS_store
