@@ -14,6 +14,7 @@ class AuthMethod(object):
 class OpenPAYGOMetricsShared(object):
 
     CONDENSED_KEY_NAMES = {
+        # Request
         'serial_number': 'sn',
         'timestamp': 'ts',
         'auth': 'a',
@@ -23,17 +24,36 @@ class OpenPAYGOMetricsShared(object):
         'data_format': 'dfo',
         'data': 'd',
         'historical_data': 'hd',
-        'accessories': 'acc'
+        'accessories': 'acc',
+        # Response
+        'token_list': 'tkl',
+        'active_until_timestamp': 'auts',
+        'active_seconds_left': 'asl',
+        'settings': 'st',
+        'extra_data': 'ed',
+        # Data
+        'token_count': 'tc',
+        'active_until_timestamp_requested': 'autsr',
+        'active_seconds_left_requested': 'aslr'
     }
 
     @classmethod
     def convert_dict_keys_to_condensed(cls, simple_dict):
+        return cls.convert_dict_keys(simple_dict, cls.CONDENSED_KEY_NAMES)
+    
+    @classmethod
+    def convert_dict_keys_to_simple(cls, condensed_dict):
+        revert_keys = {v: k for k, v in cls.CONDENSED_KEY_NAMES.items()}
+        return cls.convert_dict_keys(condensed_dict, revert_keys)
+
+    @classmethod
+    def convert_dict_keys(cls, origin_dict, key_map):
         condensed_dict = {}
-        for key in simple_dict:
-            if key in cls.CONDENSED_KEY_NAMES:
-                condensed_dict[cls.CONDENSED_KEY_NAMES[key]] = simple_dict[key]
+        for key in origin_dict:
+            if key in key_map:
+                condensed_dict[key_map[key]] = origin_dict[key]
             else:
-                condensed_dict[key] = simple_dict[key]
+                condensed_dict[key] = origin_dict[key]
         return condensed_dict
     
     @classmethod
@@ -45,6 +65,25 @@ class OpenPAYGOMetricsShared(object):
     @classmethod
     def convert_to_metrics_json(cls, data):
         return json.dumps(data, separators=(',', ':'))
+    
+    @classmethod
+    def generate_response_signature_from_data(cls, data, secret_key, serial_number, timestamp=None, request_count=None):
+        payload = serial_number
+        if timestamp:
+            payload += str(timestamp)
+        if request_count:
+            payload += str(request_count)
+        if data.get('active_until_timestamp'):
+            payload += str(data.get('active_until_timestamp'))
+        if data.get('active_seconds_left'):
+            payload += str(data.get('active_seconds_left'))
+        if data.get('token_list'):
+            payload += cls.convert_to_metrics_json(data.get('token_list'))
+        if data.get('settings'):
+            payload += cls.convert_to_metrics_json(data.get('settings'))
+        if data.get('extra_data'):
+            payload += cls.convert_to_metrics_json(data.get('extra_data'))
+        return AuthMethod.DATA_AUTH+cls.generate_hash_string(payload, secret_key)
     
     @classmethod
     def generate_request_signature_from_data(cls, data, auth_method, secret_key):
@@ -62,17 +101,19 @@ class OpenPAYGOMetricsShared(object):
             payload = data.get('serial_number')
             if data.get('timestamp'):
                 payload += str(data.get('timestamp'))
-            elif data.get('request_count'):
+            if data.get('request_count'):
                 payload += str(data.get('request_count'))
-            payload += cls.convert_to_metrics_json(data.get('data', []))
-            payload += cls.convert_to_metrics_json(data.get('historical_data', []))
+            if data.get('data'):
+                payload += cls.convert_to_metrics_json(data.get('data', []))
+            if data.get('historical_data'):
+                payload += cls.convert_to_metrics_json(data.get('historical_data', []))
             signature = cls.generate_hash_string(payload, secret_key)
         elif auth_method == AuthMethod.RECURSIVE_DATA_AUTH:
             payload = data.get('serial_number')
             payload = cls.generate_hash_string(payload, secret_key)
             if data.get('timestamp'):
                 payload = cls.generate_hash_string(payload+str(data.get('timestamp')), secret_key)
-            elif data.get('request_count'):
+            if data.get('request_count'):
                 payload = cls.generate_hash_string(payload+str(data.get('request_count')), secret_key)
             payload = cls.generate_hash_string(payload+cls.convert_to_metrics_json(data.get('data', [])), secret_key)
             for time_step_data in data.get('historical_data', []):

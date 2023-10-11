@@ -192,14 +192,14 @@ metrics_request = MetricsRequestHandler(
       auth_method=AuthMethod.RECURSIVE_DATA_AUTH
 )
 
-metrics_requestset_timestamp(1611583070)
-metrics_requestset_data({
+metrics_request.set_timestamp(1611583070)
+metrics_request.set_data({
   "token_count": 3,
   "tampered": False,
   "firmware_version": "1.2.3"
 })
 # Here we assume that the data we send is separated by 60 seconds as per the data format
-metrics_requestset_historical_data([
+metrics_request.set_historical_data([
   {
       "panel_voltage": 12.31,
       "battery_voltage": 12.32,
@@ -213,7 +213,7 @@ metrics_requestset_historical_data([
       "battery_current": -1.21,
   }
 ])
-payload = metrics_requestget_condensed_request_payload()
+payload = metrics_request.get_condensed_request_payload()
 
 # We can now proceed to send the payload to the URL
 # It looks something like `{"sn":"aaa111222","df":1234,"ts":1611583070,"d":[3,false,"1.2.3"],"hd":[[12.31,12.32,1.23,-1.23],[12.3,12.31,1.22,-1.21]],"a":"raa5cb1fda302cf94e"}`
@@ -232,39 +232,44 @@ You can use the `MetricsResponseHandler` object to process your OpenPAYGO Metric
 - `metrics_payload` (required): The OpenPAYGO Metrics payload, as a string containing the JSON payload. 
 - `secret_key` (optional): The secret key provided as a string containing 32 hexadecimal characters (e.g. `dac86b1a29ab82edc5fbbc41ec9530f6`)
 - `data_format` (optional): The data format, provided as dictionnary matching the data format object specifications. 
+- `last_request_count` (optional): The request count of the last valid request (used for avoiding request replay)
+- `last_request_timestamp` (optional): The timestamp of the last valid request (used for avoiding request replay)
 
 It provides the following methods:
 - `get_device_serial()`: Returns the serial number of the device as a string. 
-- `set_device_parameters(secret_key, data_format)`: Used to set the device data required for proper processing of the request in the handler if it was not set initially, which is often the case as the serial number is usually required to fetch that data. It will return `ValueError` if either of the parameters is invalid. 
-- `is_auth_valid()`: Returns `true` if the authentication provided is valid or `false` if not. 
+- `set_device_parameters(secret_key, data_format, last_request_count, last_request_timestamp)`: Used to set the device data required for proper processing of the request in the handler if it was not set initially, which is often the case as the serial number is usually required to fetch that data. It will return `ValueError` if either of the parameters is invalid. 
+- `is_auth_valid()`: Returns `true` if the authentication provided is valid or `false` if not. Note that it checks both that the signature is valid and that the `request_count` or `timestamp` are more recent than the one provided in the device parameters. 
 - `get_simple_metrics()`: Returns the metrics provided in the simple expanded format. It will also convert relative timestamps into explicit timestamps for easier processing. 
 - `expects_token_answer()`: Return `true` if the payload requested tokens in the answer. You can set the tokens to be returned by calling `add_tokens_to_answer(token_list)` with `token_list` being a list of token strings. 
 - `expects_time_answer()`: Return `true` if the payload requested either relative time or absolute time in the answer. You can set the time to be returned by calling `add_time_to_answer(target_datetime)` with `target_datetime` being a datetime object. The function will automatically provide it in the correct format based on the request.  
 - `add_settings_to_answer(settings_dict)`: Will add the provided settings dictionnary to the answer. 
 - `add_extra_data_to_answer(extra_data_dict)`: Will add the provided extra data dictionnary to the answer. 
-- `get_answer()`: Will return the answer as a string based on the request and the data added to answer, it will automatically handle the authentication and fomatting. 
+- `add_new_base_url_to_answer(new_base_url)`: Will tell the device to change the base URL to send the data to. 
+- `get_answer_payload()`: Will return the answer as a string based on the request and the data added to answer, it will automatically handle the authentication and fomatting. 
 
 
 **Example - Full Request flow from server side:**
 
 ```python
-from openpaygo import MetricsHandler
-from my_db_service import get_device, store_metric
+from openpaygo import MetricsResponseHandler
+from my_db_service import get_device, get_data_format, store_metric
 
 
 @app.route('/dd')
 def device_data():
   # We load the metrics
   try:
-    metrics = MetricsHandler(request.data)
+    metrics = MetricsResponseHandler(request.data)
   except ValueError as e:
     return {'error': 'Invalid data format'}, 400
   # We get the serial number and load the device data from our storage
   device = get_device(serial=metrics.get_device_serial())
+  # We get the data format if needed from our storage
+  data_format = get_data_format(id=metrics.get_data_format_id()) if not metrics.data_format_available() else None
   # We set the device parameters in the metrics handler
   metrics.set_device_parameters(
     secret_key=device.secret_key,
-    data_format=device.data_format
+    data_format=data_format
   )
   # We check the authentication
   if not metrics.is_auth_valid():
@@ -274,6 +279,7 @@ def device_data():
   # We store the metrics in our database
   for metric_data in simple_data.get('data'):
     store_metric(name=metric_data['name'], value=metric_data['value'])
+  # Here the handler automatically computed the timestamp for each step
   for time_step in simple_data.get('historical_data'):
     for historical_metric_data in time_step:
       store_metric(name=metric_data['name'], value=metric_data['value'], time=time_step['timestamp'])
@@ -285,7 +291,7 @@ def device_data():
   # We can add extra data
   metrics.add_settings_to_answer({'language': 'fr-FR'})
   # The handler handles the signature, etc.
-  return metrics.get_answer(), 200
+  return metrics.get_answer_payload(), 200
 ```
 
 
@@ -293,6 +299,9 @@ def device_data():
 
 ### 2023-10-09 - v0.3.0
 - Fix token generation issue
+- Add support for OpenPAYGO Metrics Request Generation
+- Add support for OpenPAYGO Metrics Request Decoding
+- Add support for OpenPAYGO Metrics Response Generation
 
 ### 2023-10-03 - v0.2.0
 - First working version published on PyPI

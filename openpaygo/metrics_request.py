@@ -54,13 +54,19 @@ class MetricsRequestHandler(object):
 
     def get_condensed_request_dict(self):
         if not self.data_format:
-            raise ValueError('No data format provided for condensed request')
-        condensed_request = self.request_dict
+            raise ValueError('No Data Format provided for condensed request')
+        data_order = self.data_format.get('data_order')
+        if self.data and not data_order:
+            raise ValueError('Data Format does not contain data_order')
+        historical_data_order = self.data_format.get('historical_data_order')
+        if self.historical_data and not historical_data_order:
+            raise ValueError('Data Format does not contain historical_data_order')
+        condensed_request = copy.deepcopy(self.request_dict)
         condensed_request['data'] = []
         condensed_request['historical_data'] = []
         # We add the data
         data_copy = copy.deepcopy(self.data)
-        for var in self.data_format.get('data_order'):
+        for var in data_order:
             condensed_request['data'].append(data_copy.pop(var) if var in data_copy else None)
         if len(data_copy) > 0:
             raise ValueError('Additional variables not present in the data format: '+str(data_copy))
@@ -69,7 +75,7 @@ class MetricsRequestHandler(object):
         historical_data_copy = copy.deepcopy(self.historical_data)
         for time_step in historical_data_copy:
             time_step_data = []
-            for var in self.data_format.get('historical_data_order'):
+            for var in historical_data_order:
                 time_step_data.append(time_step.pop(var) if var in time_step else None)
             if len(time_step) > 0:
                 raise ValueError('Additional variables not present in the historical data format: '+str(time_step))
