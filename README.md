@@ -10,7 +10,7 @@ This repository contains the Python library for using implementing the different
   <a href="https://github.com/EnAccess/OpenPAYGO-python/blob/main/LICENSE" target="_blank">
     <img
       alt="License"
-      src="https://img.shields.io/github/license/openpaygo/openpaygo-python"
+      src="https://img.shields.io/github/license/EnAccess/openpaygo-python"
     >
   </a>
 </p>
