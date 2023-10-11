@@ -7,7 +7,7 @@ This repository contains the Python library for using implementing the different
     alt="Project Status"
     src="https://img.shields.io/badge/Project%20Status-beta-orange"
   >
-  <a href="https://github.com/openpaygo/metrics/blob/main/LICENSE" target="_blank">
+  <a href="https://github.com/EnAccess/OpenPAYGO-python/blob/main/LICENSE" target="_blank">
     <img
       alt="License"
       src="https://img.shields.io/github/license/openpaygo/openpaygo-python"
