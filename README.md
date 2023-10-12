@@ -277,6 +277,7 @@ def device_data():
   metrics.set_device_parameters(
     secret_key=device.secret_key,
     data_format=data_format,
+    last_request_count=device.last_request_count,
     last_request_timestamp=device.last_request_timestamp
   )
   # We check the authentication
@@ -311,6 +312,9 @@ def device_data():
 
 
 ## Changelog
+
+### 2023-10-12 - v0.5.1
+- Fixes typo in function name
 
 ### 2023-10-12 - v0.5.0
 - Added convenience functions for accessing the current request count and request timestamp
