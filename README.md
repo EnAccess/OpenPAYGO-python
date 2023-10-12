@@ -243,6 +243,8 @@ It provides the following methods:
 - `set_device_parameters(secret_key, data_format, last_request_count, last_request_timestamp)`: Used to set the device data required for proper processing of the request in the handler if it was not set initially, which is often the case as the serial number is usually required to fetch that data. It will return `ValueError` if either of the parameters is invalid. 
 - `is_auth_valid()`: Returns `true` if the authentication provided is valid or `false` if not. Note that it checks both that the signature is valid and that the `request_count` or `timestamp` are more recent than the one provided in the device parameters. 
 - `get_simple_metrics()`: Returns the metrics provided in the simple expanded format. It will also convert relative timestamps into explicit timestamps for easier processing. 
+- `get_data_timestamp()`: Returns the timestamp of the data, either the `data_collection_timestamp` if available or the timestamp `timestamp` or the time of the request as fallback. 
+- `get_token_count()`: Returns the token count provided in the request (if any). 
 - `expects_token_answer()`: Return `true` if the payload requested tokens in the answer. You can set the tokens to be returned by calling `add_tokens_to_answer(token_list)` with `token_list` being a list of token strings. 
 - `expects_time_answer()`: Return `true` if the payload requested either relative time or absolute time in the answer. You can set the time to be returned by calling `add_time_to_answer(target_datetime)` with `target_datetime` being a datetime object. The function will automatically provide it in the correct format based on the request.  
 - `add_settings_to_answer(settings_dict)`: Will add the provided settings dictionnary to the answer. 
@@ -255,7 +257,7 @@ It provides the following methods:
 
 ```python
 from openpaygo import MetricsResponseHandler
-from my_db_service import get_device, get_data_format, store_metric
+from my_db_service import get_device, get_data_format, store_metric, get_pending_tokens
 
 
 @app.route('/dd')
@@ -272,7 +274,8 @@ def device_data():
   # We set the device parameters in the metrics handler
   metrics.set_device_parameters(
     secret_key=device.secret_key,
-    data_format=data_format
+    data_format=data_format,
+    last_request_timestamp=device.last_request_timestamp
   )
   # We check the authentication
   if not metrics.is_auth_valid():
@@ -280,15 +283,17 @@ def device_data():
   # We transform the condensed data received from the device in simple data
   simple_data = metrics.get_simple_metrics()
   # We store the metrics in our database
-  for metric_data in simple_data.get('data'):
-    store_metric(name=metric_data['name'], value=metric_data['value'])
-  # Here the handler automatically computed the timestamp for each step
+  for metric_name, metric_value in simple_data.get('data'):
+    store_metric(name=metric_name, value=metric_value, time=metrics.get_data_timestamp())
+  # We store the historical metrics as well
   for time_step in simple_data.get('historical_data'):
-    for historical_metric_data in time_step:
-      store_metric(name=metric_data['name'], value=metric_data['value'], time=time_step['timestamp'])
+    # Here the handler automatically computed the timestamp for each step
+    timestamp = timestep.pop('timestamp')
+    for metric_name, metric_value in time_step:
+      store_metric(name=metric_name, value=metric_value, time=timestamp)
   # We prepare the answer
   if metrics.expects_token_answer():
-    metrics.add_tokens_to_answer(device.pending_token_list)
+    metrics.add_tokens_to_answer(get_pending_tokens(device, metrics.get_token_count()))
   elif metrics.expects_time_answer():
     metrics.add_time_to_answer(device.expiration_datetime)
   # We can add extra data
@@ -299,6 +304,11 @@ def device_data():
 
 
 ## Changelog
+
+### 2023-10-09 - v0.4.0
+- Added convenience functions for accessing token count and data timestamp
+- Added automatic verification of last request count or timestamp during auth
+- Fixed issues in documentation
 
 ### 2023-10-09 - v0.3.0
 - Fix token generation issue

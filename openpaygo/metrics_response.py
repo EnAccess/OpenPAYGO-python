@@ -32,9 +32,15 @@ class MetricsResponseHandler(object):
     def data_format_available(self):
         return self.data_format != None
     
-    def set_device_parameters(self, secret_key, data_format):
-        self.secret_key = secret_key
-        self.data_format = data_format
+    def set_device_parameters(self, secret_key=None, data_format=None, last_request_count=None, last_request_timestamp=None):
+        if secret_key:
+            self.secret_key = secret_key
+        if data_format:
+            self.data_format = data_format
+        if last_request_count:
+            self.last_request_count = last_request_count
+        if last_request_timestamp:
+            self.last_request_timestamp = last_request_timestamp
 
     def is_auth_valid(self):
         auth_string = self.request_dict.get('auth', None)
@@ -65,10 +71,16 @@ class MetricsResponseHandler(object):
         # We fill in the timestamps for each time step
         simple_dict['historical_data'] = self._fill_timestamp_in_historical_data(simple_dict['historical_data'])
         return simple_dict
-
-    def expects_token_answer(self):
+    
+    def get_data_timestamp(self):
+        return self.request_dict.get('data_collection_timestamp', self.request_dict.get('timestamp'))
+    
+    def get_token_count(self):
         data = self._get_simple_data()
-        return data.get('token_count') is not None
+        return data.get('token_count')
+    
+    def expects_token_answer(self):
+        return self.get_token_count() is not None
 
     def add_tokens_to_answer(self, token_list):
         self.response_dict['token_list'] = token_list
@@ -166,10 +178,7 @@ class MetricsResponseHandler(object):
         return clean_historical_data
     
     def _fill_timestamp_in_historical_data(self, historical_data):
-        if self.request_dict.get('data_collection_timestamp'):
-            last_timestamp = datetime.fromtimestamp(self.request_dict.get('data_collection_timestamp'))
-        else:
-            last_timestamp = datetime.fromtimestamp(self.timestamp)
+        last_timestamp = datetime.fromtimestamp(self.get_data_timestamp())
         for idx, time_step in enumerate(historical_data):
             if time_step.get('relative_time') is not None:
                 last_timestamp = last_timestamp + timedelta(seconds=int(time_step.get('relative_time')))
