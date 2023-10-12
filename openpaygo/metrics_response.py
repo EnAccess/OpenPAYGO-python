@@ -11,6 +11,7 @@ class MetricsResponseHandler(object):
         # We convert the base variable names to simple
         self.request_dict = OpenPAYGOMetricsShared.convert_dict_keys_to_simple(self.request_dict)
         # We add the reception timestamp if not timestamp was provided
+        self.request_timestamp = self.request_dict.get('timestamp')
         if not self.request_dict.get('timestamp'):
             self.timestamp = int(datetime.now().timestamp())
         else:
@@ -73,7 +74,13 @@ class MetricsResponseHandler(object):
         return simple_dict
     
     def get_data_timestamp(self):
-        return self.request_dict.get('data_collection_timestamp', self.request_dict.get('timestamp'))
+        return self.request_dict.get('data_collection_timestamp', self.timestamp)
+    
+    def get_request_timestmap(self):
+        return self.request_timestamp
+    
+    def get_request_count(self):
+        return self.request_dict.get('request_count')
     
     def get_token_count(self):
         data = self._get_simple_data()

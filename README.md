@@ -244,6 +244,8 @@ It provides the following methods:
 - `is_auth_valid()`: Returns `true` if the authentication provided is valid or `false` if not. Note that it checks both that the signature is valid and that the `request_count` or `timestamp` are more recent than the one provided in the device parameters. 
 - `get_simple_metrics()`: Returns the metrics provided in the simple expanded format. It will also convert relative timestamps into explicit timestamps for easier processing. 
 - `get_data_timestamp()`: Returns the timestamp of the data, either the `data_collection_timestamp` if available or the timestamp `timestamp` or the time of the request as fallback. 
+- `get_request_timestamp()`: This is the `timestamp` that was explicitely set in the request and was signed, used to avoid replay attacks. It might be different from the data timestamp. 
+- `get_request_count()`: This is the `request_count` set in the request and was signed, used to avoid replay attacks. 
 - `get_token_count()`: Returns the token count provided in the request (if any). 
 - `expects_token_answer()`: Return `true` if the payload requested tokens in the answer. You can set the tokens to be returned by calling `add_tokens_to_answer(token_list)` with `token_list` being a list of token strings. 
 - `expects_time_answer()`: Return `true` if the payload requested either relative time or absolute time in the answer. You can set the time to be returned by calling `add_time_to_answer(target_datetime)` with `target_datetime` being a datetime object. The function will automatically provide it in the correct format based on the request.  
@@ -298,12 +300,21 @@ def device_data():
     metrics.add_time_to_answer(device.expiration_datetime)
   # We can add extra data
   metrics.add_settings_to_answer({'language': 'fr-FR'})
+  # We update the request timestamp or the count if provided to be able to reject duplicate or replay requests
+  if metrics.get_request_count(): 
+    device.last_request_count = metrics.get_request_count()
+  if metrics.get_request_timestamp(): 
+    device.last_request_timestamp = metrics.get_request_timestamp()
   # The handler handles the signature, etc.
   return metrics.get_answer_payload(), 200
 ```
 
 
 ## Changelog
+
+### 2023-10-12 - v0.5.0
+- Added convenience functions for accessing the current request count and request timestamp
+- Improved documentation on how to avoid replay attacks
 
 ### 2023-10-12 - v0.4.0
 - Added convenience functions for accessing token count and data timestamp
