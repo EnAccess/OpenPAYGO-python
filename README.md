@@ -233,7 +233,8 @@ try:
 
 You can use the `MetricsResponseHandler` object to process your OpenPAYGO Metrics request from start to finish. It accepts the following initial inputs: 
 - `metrics_payload` (required): The OpenPAYGO Metrics payload, as a string containing the JSON payload. 
-- `secret_key` (optional): The secret key provided as a string containing 32 hexadecimal characters (e.g. `dac86b1a29ab82edc5fbbc41ec9530f6`)
+- `secret_key` (optional): The secret key provided as a string containing 32 hexadecimal characters (e.g. `dac86b1a29ab82edc5fbbc41ec9530f6`). If the secret key is not set later using `set_device_parameters()`, then you will not be able to verify the auth of the request (it will throw an error if you try) and the response will not be signed. 
+- `skip_auth`
 - `data_format` (optional): The data format, provided as dictionnary matching the data format object specifications. 
 - `last_request_count` (optional): The request count of the last valid request (used for avoiding request replay)
 - `last_request_timestamp` (optional): The timestamp of the last valid request (used for avoiding request replay)
@@ -312,6 +313,10 @@ def device_data():
 
 
 ## Changelog
+
+### 2023-10-12 - v0.5.2
+- Clarification in the doc of the behaviour when `secret_key` is missing
+- Implemented coherent behaviour when `secret_key` is missing
 
 ### 2023-10-12 - v0.5.1
 - Fixes typo in function name

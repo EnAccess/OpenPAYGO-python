@@ -46,7 +46,7 @@ class MetricsResponseHandler(object):
     def is_auth_valid(self):
         auth_string = self.request_dict.get('auth', None)
         if not auth_string:
-            return True
+            return False
         elif not self.secret_key:
             raise ValueError('Secret key is required to check the auth.')
         self.auth_method = auth_string[:2]
@@ -129,13 +129,14 @@ class MetricsResponseHandler(object):
     def get_answer_dict(self):
         # If there is not data format, we just return the full response
         condensed_answer = copy.deepcopy(self.response_dict)
-        condensed_answer['auth'] = OpenPAYGOMetricsShared.generate_response_signature_from_data(
-            serial_number=self.request_dict.get('serial_number'),
-            request_count=self.request_dict.get('request_count'),
-            data=condensed_answer,
-            timestamp=self.request_dict.get('timestamp'),
-            secret_key=self.secret_key
-        )
+        if self.secret_key:
+            condensed_answer['auth'] = OpenPAYGOMetricsShared.generate_response_signature_from_data(
+                serial_number=self.request_dict.get('serial_number'),
+                request_count=self.request_dict.get('request_count'),
+                data=condensed_answer,
+                timestamp=self.request_dict.get('timestamp'),
+                secret_key=self.secret_key
+            )
         return OpenPAYGOMetricsShared.convert_dict_keys_to_condensed(condensed_answer)
 
     def _get_simple_data(self):
