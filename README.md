@@ -270,7 +270,7 @@ def device_data():
   # We get the serial number and load the device data from our storage
   device = get_device(serial=metrics.get_device_serial())
   # We get the data format if needed from our storage
-  data_format = get_data_format(id=metrics.get_data_format_id()) if not metrics.data_format_available() else None
+  data_format = get_data_format(id=metrics.get_data_format_id()) if metrics.get_data_format_id() else None
   # We set the device parameters in the metrics handler
   metrics.set_device_parameters(
     secret_key=device.secret_key,
@@ -305,7 +305,7 @@ def device_data():
 
 ## Changelog
 
-### 2023-10-09 - v0.4.0
+### 2023-10-12 - v0.4.0
 - Added convenience functions for accessing token count and data timestamp
 - Added automatic verification of last request count or timestamp during auth
 - Fixed issues in documentation
