@@ -1,14 +1,3 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
-
-setup(
-    name="openpaygo", 
-    packages=find_packages(),
-    version='0.5.2',
-    license='MIT',
-    author="Solaris Offgrid",
-    url='https://github.com/EnAccess/OpenPAYGO-python/',
-    install_requires=[
-        'siphash',
-    ],
-)
+setup()
