@@ -7,6 +7,10 @@ This repository contains the Python library for using implementing the different
     alt="Project Status"
     src="https://img.shields.io/badge/Project%20Status-beta-orange"
   >
+  <img
+    alt="GitHub Workflow Status"
+    src="https://img.shields.io/github/actions/workflow/status/EnAccess/OpenPAYGO-python/ci-cd.yml"
+  >
   <a href="https://github.com/EnAccess/OpenPAYGO-python/blob/main/LICENSE" target="_blank">
     <img
       alt="License"
@@ -312,6 +316,9 @@ def device_data():
 
 
 ## Changelog
+
+### 2023-10-13 - v0.5.4
+- Safe handling of datetime before UNIX timestamp minimum when generating answer timestamp
 
 ### 2023-10-13 - v0.5.3
 - Fix handling of `last_request_timestamp` when checking auth

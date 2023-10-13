@@ -103,9 +103,14 @@ class MetricsResponseHandler(object):
     def add_time_to_answer(self, target_datetime):
         data = self._get_simple_data()
         if data.get('active_until_timestamp_requested', False):
-            self.response_dict['active_until_timestamp'] = target_datetime.timestamp()
+            target_timestamp = 0
+            if target_datetime:
+                if target_datetime.year > 1970:
+                    target_timestamp = target_datetime.timestamp()
+            self.response_dict['active_until_timestamp'] = target_timestamp
         elif data.get('active_seconds_left_requested', False):
-            self.response_dict['active_seconds_left'] = (datetime.now() - target_datetime).total_seconds()
+            seconds_left = (datetime.now() - target_datetime).total_seconds() if target_datetime else 0
+            self.response_dict['active_seconds_left'] = seconds_left if seconds_left > 0 else 0
         else:
             raise ValueError('No time requested')
         
