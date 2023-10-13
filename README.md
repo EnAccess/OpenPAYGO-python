@@ -30,8 +30,7 @@ This open-source project was developped by Solaris Offgrid. Sponsorship for the 
     - [Generating a Request (Device Side)](#generating-a-request-device-side)
     - [Handling a Request and Generating a Response (Server Side)](#handling-a-request-and-generating-a-response-server-side)
   - [Changelog](#changelog)
-    - [2023-10-09 - v0.3.0](#2023-10-09---v030)
-    - [2023-10-03 - v0.2.0](#2023-10-03---v020)
+  
 
 ## Key Features
 - Implements token generation and decoding with full support for the v2.3 of the [OpenPAYGO Token](https://github.com/EnAccess/OpenPAYGO-Token) specifications. 
