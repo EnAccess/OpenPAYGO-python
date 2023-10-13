@@ -53,10 +53,10 @@ class MetricsResponseHandler(object):
         new_signature = OpenPAYGOMetricsShared.generate_request_signature_from_data(self.request_dict, self.auth_method, self.secret_key)
         if auth_string == new_signature:
             request_count = self.get_request_count()
-            if request_count and self.last_request_count and request_count > self.last_request_count:
+            if request_count and self.last_request_count and request_count <= self.last_request_count:
                 return False
             timestamp = self.get_request_timestamp()
-            if timestamp and self.last_request_timestamp and timestamp > self.last_request_timestamp:
+            if timestamp and self.last_request_timestamp and timestamp <= self.last_request_timestamp:
                 return False
             # Either the request count or timestamp is required
             if request_count or timestamp:

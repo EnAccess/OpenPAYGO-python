@@ -314,6 +314,9 @@ def device_data():
 
 ## Changelog
 
+### 2023-10-13 - v0.5.3
+- Fix handling of `last_request_timestamp` when checking auth
+
 ### 2023-10-12 - v0.5.2
 - Clarification in the doc of the behaviour when `secret_key` is missing
 - Implemented coherent behaviour when `secret_key` is missing
