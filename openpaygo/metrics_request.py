@@ -34,7 +34,8 @@ class MetricsRequestHandler(object):
             for time_step in historical_data:
                 if not time_step.get("timestamp"):
                     raise ValueError(
-                        "Historical Data objects must have a time stamp if no historical_data_interval is defined."
+                        "Historical Data objects must have a time stamp if no "
+                        "historical_data_interval is defined."
                     )
         self.historical_data = historical_data
 

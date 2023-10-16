@@ -40,7 +40,7 @@ class MetricsResponseHandler(object):
         return self.request_dict.get("data_format_id")
 
     def data_format_available(self):
-        return self.data_format != None
+        return self.data_format is not None
 
     def set_device_parameters(
         self,
@@ -222,8 +222,8 @@ class MetricsResponseHandler(object):
                 time_step = time_step[timse_step_len:]
                 if len(time_step) > 0:
                     raise ValueError(
-                        "Additional variables not present in the historical data format: "
-                        + str(time_step)
+                        "Additional variables not present in the historical data format"
+                        ": " + str(time_step)
                     )
             elif isinstance(time_step, dict):
                 for key in time_step:

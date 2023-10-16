@@ -94,8 +94,10 @@ class OpenPAYGOTokenDecoder(object):
         value = cls._decode_base(
             starting_code_base, token_base
         )  # If there is a match we get the value from the token
-        # We try all combination up until last_count + TOKEN_JUMP, or to the larger jump if syncing counter
-        # We could start directly the loop at the last count if we kept the token value for the last count
+        # We try all combination up until last_count + TOKEN_JUMP, or to the larger jump
+        # if syncing counter.
+        # We could start directly the loop at the last count if we kept the token value
+        # for the last count
         if value == OpenPAYGOTokenShared.COUNTER_SYNC_VALUE:
             max_count_try = last_count + cls.MAX_TOKEN_JUMP_COUNTER_SYNC + 1
         else:
@@ -157,11 +159,13 @@ class OpenPAYGOTokenDecoder(object):
             or value == OpenPAYGOTokenShared.COUNTER_SYNC_VALUE
             or value == OpenPAYGOTokenShared.PAYG_DISABLE_VALUE
         ):
-            # If it is not an Add-Time token, we mark all the past tokens as used in the range
+            # If it is not an Add-Time token, we mark all the past tokens as used in the
+            # range
             for count in range(bottom_range, highest_count + 1):
                 used_counts.append(count)
         else:
-            # If it is an Add-Time token, we just mark the tokens actually used in the range
+            # If it is an Add-Time token, we just mark the tokens actually used in the
+            # range
             for count in range(bottom_range, highest_count + 1):
                 if count == new_count or count in past_used_counts:
                     used_counts.append(count)

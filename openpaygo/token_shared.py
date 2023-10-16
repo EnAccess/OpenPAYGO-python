@@ -62,9 +62,10 @@ class OpenPAYGOTokenShared(object):
     def load_secret_key_from_hex(cls, secret_key):
         try:
             return codecs.decode(secret_key, "hex")
-        except Exception as e:
+        except Exception:
             raise ValueError(
-                "The secret key provided is not correctly formatted, it should be 32 hexadecimal characters. "
+                "The secret key provided is not correctly formatted, it should be 32 "
+                "hexadecimal characters. "
             )
 
     @classmethod
