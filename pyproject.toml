@@ -1,4 +1,8 @@
 [tool.ruff]
+# Add some rules to ruff's default: 
+# - isort: https://docs.astral.sh/ruff/rules/#isort-i
+# - pep8-naming: https://docs.astral.sh/ruff/rules/#pep8-naming-n
+select = ["E", "F", "I", "N"]
 
 # Same as Black.
 line-length = 88

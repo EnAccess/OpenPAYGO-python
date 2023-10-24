@@ -1,5 +1,5 @@
-from .token_encode import OpenPAYGOTokenEncoder
 from .token_decode import OpenPAYGOTokenDecoder
+from .token_encode import OpenPAYGOTokenEncoder
 
 
 def generate_token(**kwargs):

@@ -1,5 +1,6 @@
-from .metrics_shared import OpenPAYGOMetricsShared
 import copy
+
+from .metrics_shared import OpenPAYGOMetricsShared
 
 
 class MetricsRequestHandler(object):

@@ -1,7 +1,8 @@
-import json
-from .metrics_shared import OpenPAYGOMetricsShared
 import copy
+import json
 from datetime import datetime, timedelta
+
+from .metrics_shared import OpenPAYGOMetricsShared
 
 
 class MetricsResponseHandler(object):

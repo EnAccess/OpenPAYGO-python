@@ -1,6 +1,7 @@
-import siphash
-import struct
 import codecs
+import struct
+
+import siphash
 
 
 class TokenType(object):

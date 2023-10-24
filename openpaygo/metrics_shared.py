@@ -1,6 +1,7 @@
-import siphash
 import codecs
 import json
+
+import siphash
 
 
 class AuthMethod(object):
