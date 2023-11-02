@@ -1,0 +1,30 @@
+name: Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ruff:
+    name: Lint ruff
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install ruff
+        run: pipx install ruff
+      - name: Run editorconfig-checker
+        run: ruff check .
+
+  black:
+    name: Lint Black
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Black
+        uses: psf/black@stable
