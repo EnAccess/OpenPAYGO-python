@@ -16,7 +16,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install ruff
-        run: pipx ruff
+        run: pipx install ruff
       - name: Run editorconfig-checker
         run: ruff check .
 
