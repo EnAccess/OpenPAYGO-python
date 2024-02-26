@@ -9,7 +9,7 @@ This repository contains the Python library for using implementing the different
   >
   <img
     alt="GitHub Workflow Status"
-    src="https://img.shields.io/github/actions/workflow/status/EnAccess/OpenPAYGO-python/ci-cd.yml"
+    src="https://img.shields.io/github/actions/workflow/status/EnAccess/OpenPAYGO-python/.github/workflows/check.yaml"
   >
   <a href="https://github.com/EnAccess/OpenPAYGO-python/blob/main/LICENSE" target="_blank">
     <img
