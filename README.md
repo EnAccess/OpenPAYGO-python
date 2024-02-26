@@ -1,7 +1,15 @@
-# OpenPAYGO - Python Lib
-
-This repository contains the Python library for using implementing the different OpenPAYGOToken Suite technologies on your server (for generating tokens and decoding openpaygo metrics payloads) or device (for decoding tokens and making openpaygo metrics payloads).
-
+<p align="center">
+  <a href="https://github.com/EnAccess/OpenPAYGO-Token">
+    <img
+      src="https://enaccess.org/wp-content/uploads/2024/02/OpenPAYGO-Graphics-GitHub-2240-×-800.svg"
+      alt="OpenPAYGO Token"
+      width="640"
+    >
+  </a>
+</p>
+<p align="center">
+    <em>The OpenPAYGO is an open source token system to enable PAYGO functionality in new products.</em>
+</p>
 <p align="center">
   <img
     alt="Project Status"
@@ -18,6 +26,12 @@ This repository contains the Python library for using implementing the different
     >
   </a>
 </p>
+
+---
+
+# OpenPAYGO - Python Lib
+
+This repository contains the Python library for using implementing the different OpenPAYGOToken Suite technologies on your server (for generating tokens and decoding openpaygo metrics payloads) or device (for decoding tokens and making openpaygo metrics payloads).
 
 ## Credits
 
