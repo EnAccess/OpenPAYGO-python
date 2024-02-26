@@ -171,14 +171,14 @@ class MetricsResponseHandler(object):
         # If there is not data format, we just return the full response
         condensed_answer = copy.deepcopy(self.response_dict)
         if self.secret_key:
-            condensed_answer[
-                "auth"
-            ] = OpenPAYGOMetricsShared.generate_response_signature_from_data(
-                serial_number=self.request_dict.get("serial_number"),
-                request_count=self.request_dict.get("request_count"),
-                data=condensed_answer,
-                timestamp=self.request_dict.get("timestamp"),
-                secret_key=self.secret_key,
+            condensed_answer["auth"] = (
+                OpenPAYGOMetricsShared.generate_response_signature_from_data(
+                    serial_number=self.request_dict.get("serial_number"),
+                    request_count=self.request_dict.get("request_count"),
+                    data=condensed_answer,
+                    timestamp=self.request_dict.get("timestamp"),
+                    secret_key=self.secret_key,
+                )
             )
         return OpenPAYGOMetricsShared.convert_dict_keys_to_condensed(condensed_answer)
 
