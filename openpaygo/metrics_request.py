@@ -50,10 +50,10 @@ class MetricsRequestHandler(object):
         simple_request["historical_data"] = self.historical_data
         # We prepare the auth
         if self.auth_method:
-            simple_request[
-                "auth"
-            ] = OpenPAYGOMetricsShared.generate_request_signature_from_data(
-                simple_request, self.auth_method, self.secret_key
+            simple_request["auth"] = (
+                OpenPAYGOMetricsShared.generate_request_signature_from_data(
+                    simple_request, self.auth_method, self.secret_key
+                )
             )
         return simple_request
 
@@ -83,10 +83,10 @@ class MetricsRequestHandler(object):
             raise ValueError(
                 "Additional variables not present in the data format: " + str(data_copy)
             )
-        condensed_request[
-            "data"
-        ] = OpenPAYGOMetricsShared.remove_trailing_empty_elements(
-            condensed_request["data"]
+        condensed_request["data"] = (
+            OpenPAYGOMetricsShared.remove_trailing_empty_elements(
+                condensed_request["data"]
+            )
         )
         # We add the historical data
         historical_data_copy = copy.deepcopy(self.historical_data)
@@ -105,10 +105,10 @@ class MetricsRequestHandler(object):
             condensed_request["historical_data"].append(time_step_data)
         # We prepare the auth
         if self.auth_method:
-            condensed_request[
-                "auth"
-            ] = OpenPAYGOMetricsShared.generate_request_signature_from_data(
-                condensed_request, self.auth_method, self.secret_key
+            condensed_request["auth"] = (
+                OpenPAYGOMetricsShared.generate_request_signature_from_data(
+                    condensed_request, self.auth_method, self.secret_key
+                )
             )
         # We replace the key names by the condensed ones
         condensed_request = OpenPAYGOMetricsShared.convert_dict_keys_to_condensed(
