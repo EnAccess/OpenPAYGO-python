@@ -1,4 +1,4 @@
-name: Check
+name: Check Code Quality
 
 on:
   push:
@@ -13,18 +13,19 @@ jobs:
     name: Lint ruff
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
       - name: Install ruff
         run: pipx install ruff
-      - name: Run editorconfig-checker
+
+      - name: Run riff
         run: ruff check .
 
   black:
     name: Lint Black
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
       - name: Run Black
         uses: psf/black@stable
