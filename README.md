@@ -29,7 +29,7 @@
 
 ---
 
-# OpenPAYGO - Python Lib
+# OpenPAYGO - Python library
 
 This repository contains the **Python** implementions of different OpenPAYGO technologies to run on your server or device.
 
@@ -50,6 +50,19 @@ OpenPAYGO documentation is hosted on [https://enaccess.github.io/OpenPAYGO-docs/
 ## Credits
 
 This open-source project was developped by Solaris Offgrid. Sponsorship for the original OpenPAYGO Token implementation was provided by EnAccess and sponsorphip for OpenPAYGO Metrics was provided by Solaris Offgrid.
+
+## OpenPAYGO ecosystem feature availabilties
+
+The OpenPAYGO ecosystem offers a range of feautres to implement pay-as-you-go services.
+These features are implemented in different programming language libraries individually.
+Not all libraries have implemented the full range of features yet.
+
+The **OpenPAYGO Python library** supports the following features:
+
+| Feature           | Status      |
+| ----------------- | ----------- |
+| OpenPAYGO Token   | ✅ (stable) |
+| OpenPAYGO Metrics | ✅ (stable) |
 
 ## Support
 
