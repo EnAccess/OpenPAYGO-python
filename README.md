@@ -8,7 +8,7 @@
   </a>
 </p>
 <p align="center">
-    <em>The OpenPAYGO is an open source token system to enable PAYGO functionality in new products.</em>
+    <em>OpenPAYGO is an Open Source ecosystem to enable pay-as-you-go functionality in new devices and products.</em>
 </p>
 <p align="center">
   <img
@@ -31,11 +31,30 @@
 
 # OpenPAYGO - Python Lib
 
-This repository contains the Python library for using implementing the different OpenPAYGOToken Suite technologies on your server (for generating tokens and decoding openpaygo metrics payloads) or device (for decoding tokens and making openpaygo metrics payloads).
+This repository contains the **Python** implementions of different OpenPAYGO technologies to run on your server or device.
+
+Server-side tasks include
+
+- generating OpenPAYGO tokens
+- decoding OpenPAYGO metrics payloads
+
+Device side tasks
+
+- decoding OpenPAYGO tokens
+- generating OpenPAYGO metrics payloads
+
+## Documentation
+
+OpenPAYGO documentation is hosted on [https://enaccess.github.io/OpenPAYGO-docs/](https://enaccess.github.io/OpenPAYGO-docs/).
 
 ## Credits
 
 This open-source project was developped by Solaris Offgrid. Sponsorship for the original OpenPAYGO Token implementation was provided by EnAccess and sponsorphip for OpenPAYGO Metrics was provided by Solaris Offgrid.
+
+## Support
+
+- [OSEA Discord](https://discord.osea-community.org/) (`#openpaygo` channel)
+- [EnAccess](https://enaccess.org/)
 
 ## Table of Contents
 
@@ -47,7 +66,6 @@ This open-source project was developped by Solaris Offgrid. Sponsorship for the 
 - [Getting Started - OpenPAYGO Metrics](#getting-started---openpaygo-metrics)
   - [Generating a Request (Device Side)](#generating-a-request-device-side)
   - [Handling a Request and Generating a Response (Server Side)](#handling-a-request-and-generating-a-response-server-side)
-- [Changelog](#changelog)
 
 ## Key Features
 
@@ -324,46 +342,3 @@ def device_data():
   # The handler handles the signature, etc.
   return metrics.get_answer_payload(), 200
 ```
-
-## Changelog
-
-### 2023-10-13 - v0.5.4
-
-- Safe handling of datetime before UNIX timestamp minimum when generating answer timestamp
-
-### 2023-10-13 - v0.5.3
-
-- Fix handling of `last_request_timestamp` when checking auth
-
-### 2023-10-12 - v0.5.2
-
-- Clarification in the doc of the behaviour when `secret_key` is missing
-- Implemented coherent behaviour when `secret_key` is missing
-
-### 2023-10-12 - v0.5.1
-
-- Fixes typo in function name
-
-### 2023-10-12 - v0.5.0
-
-- Added convenience functions for accessing the current request count and request timestamp
-- Improved documentation on how to avoid replay attacks
-
-### 2023-10-12 - v0.4.0
-
-- Added convenience functions for accessing token count and data timestamp
-- Added automatic verification of last request count or timestamp during auth
-- Fixed issues in documentation
-
-### 2023-10-09 - v0.3.0
-
-- Fix token generation issue
-- Add support for OpenPAYGO Metrics Request Generation
-- Add support for OpenPAYGO Metrics Request Decoding
-- Add support for OpenPAYGO Metrics Response Generation
-
-### 2023-10-03 - v0.2.0
-
-- First working version published on PyPI
-- Has support for OpenPAYGO Token
-- Has working CI for pushing to PyPI
