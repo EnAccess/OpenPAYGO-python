@@ -115,7 +115,7 @@ device.save() # We save the new count that we set for the device
 
 ### Decoding Tokens (Device Side)
 
-You can use the `decode_token()` function to generate an OpenPAYGOToken Token. The function takes the following parameters, and they should match the configuration in the hardware of the device:
+You can use the `decode_token()` function to decode an OpenPAYGOToken Token. The function takes the following parameters, and they should match the configuration in the hardware of the device:
 
 - `token` (required): The token that was given by the user, as a string
 - `secret_key` (required): The secret key of the device as a string with 32 hexadecimal characters (e.g. `dac86b1a29ab82edc5fbbc41ec9530f6`)
