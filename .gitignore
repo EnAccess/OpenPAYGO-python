@@ -2,3 +2,5 @@
 dist
 openpaygo.egg-info
 .DS_store
+__pycache__
+venv
