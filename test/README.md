@@ -5,6 +5,7 @@ To run the test, first, create and activate a virtual environment. Then install 
 ```
 $ cd tests
 $ python -m venv env
+$ source env/bin/activate
 $ python -m pip install -e ..
 $ python simple_scenario_test.py
 ```
