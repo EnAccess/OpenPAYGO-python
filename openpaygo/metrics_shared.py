@@ -150,7 +150,8 @@ class OpenPAYGOMetricsShared(object):
             secret_key_bytes = bytes(secret_key)
             if len(secret_key_bytes) != 16:
                 raise ValueError(
-                    "The secret key provided is not correctly formatted, it should be 16 bytes. "
+                    "The secret key provided is not correctly formatted, it should be 16 "
+                    "bytes. "
                 )
             return secret_key_bytes
 

@@ -1,11 +1,19 @@
 from datetime import datetime
+
 from openpaygo.token_encode import OpenPAYGOTokenEncoder
 from openpaygo.token_shared import OpenPAYGOTokenShared, TokenType
 
 
 class SingleDeviceServerSimulator(object):
 
-    def __init__(self, starting_code, key, starting_count=1, restricted_digit_set=False, time_divider=1):
+    def __init__(
+        self,
+        starting_code,
+        key,
+        starting_count=1,
+        restricted_digit_set=False,
+        time_divider=1,
+    ):
         self.starting_code = starting_code
         self.key = key
         self.count = starting_count
@@ -49,12 +57,16 @@ class SingleDeviceServerSimulator(object):
 
         if new_expiration_date > furthest_expiration_date:
             # If the date is strictly above the furthest date activated, use ADD
-            value = self._get_value_to_activate(new_expiration_date, self.expiration_date, force)
+            value = self._get_value_to_activate(
+                new_expiration_date, self.expiration_date, force
+            )
             self.expiration_date = new_expiration_date
             return self._generate_token_from_value(value, mode=TokenType.ADD_TIME)
         else:
             # If the date is below or equal to the furthest date activated, use SET
-            value = self._get_value_to_activate(new_expiration_date, datetime.now(), force)
+            value = self._get_value_to_activate(
+                new_expiration_date, datetime.now(), force
+            )
             self.expiration_date = new_expiration_date
             return self._generate_token_from_value(value, mode=TokenType.SET_TIME)
 
@@ -82,7 +94,8 @@ class SingleDeviceServerSimulator(object):
                 if not force_maximum:
                     raise Exception('TOO_MANY_DAYS_TO_ACTIVATE')
                 else:
-                    return OpenPAYGOTokenShared.MAX_ACTIVATION_VALUE  # Will need to be activated again after those days
+                    # Will need to be activated again after those days
+                    return OpenPAYGOTokenShared.MAX_ACTIVATION_VALUE
             return value
 
     @staticmethod

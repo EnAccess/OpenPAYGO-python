@@ -1,16 +1,27 @@
 from datetime import datetime, timedelta
-from openpaygo.token_shared import OpenPAYGOTokenShared
+
 from openpaygo.token_decode import OpenPAYGOTokenDecoder, TokenType
+from openpaygo.token_shared import OpenPAYGOTokenShared
 
 
 class DeviceSimulator(object):
 
-    def __init__(self, starting_code, key, starting_count=1, restricted_digit_set=False, waiting_period_enabled=True, time_divider=1):
+    def __init__(
+        self,
+        starting_code,
+        key,
+        starting_count=1,
+        restricted_digit_set=False,
+        waiting_period_enabled=True,
+        time_divider=1,
+    ):
         self.starting_code = starting_code
         self.key = key
         self.time_divider = time_divider
         self.restricted_digit_set = restricted_digit_set
-        self.waiting_period_enabled = waiting_period_enabled  # Should always be true except for testing
+        self.waiting_period_enabled = (
+            waiting_period_enabled  # Should always be true except for testing
+        )
 
         self.payg_enabled = True
         self.count = starting_count
@@ -48,18 +59,23 @@ class DeviceSimulator(object):
             return 'infinite'
 
     def _update_device_status_from_token(self, token, show_result=True):
-        if self.token_entry_blocked_until > datetime.now() and self.waiting_period_enabled:
+        if (
+            self.token_entry_blocked_until > datetime.now()
+            and self.waiting_period_enabled
+        ):
             if show_result:
                 print('TOKEN_ENTRY_BLOCKED')
             return False
 
-        token_value, token_type, token_count, updated_counts = OpenPAYGOTokenDecoder.get_activation_value_count_and_type_from_token(
-            token=token,
-            starting_code=self.starting_code,
-            key=self.key,
-            last_count=self.count,
-            restricted_digit_set=self.restricted_digit_set,
-            used_counts=self.used_counts
+        token_value, token_type, token_count, updated_counts = (
+            OpenPAYGOTokenDecoder.get_activation_value_count_and_type_from_token(
+                token=token,
+                starting_code=self.starting_code,
+                key=self.key,
+                last_count=self.count,
+                restricted_digit_set=self.restricted_digit_set,
+                used_counts=self.used_counts,
+            )
         )
         if token_value is None:
             if token_type == TokenType.ALREADY_USED:
@@ -69,7 +85,9 @@ class DeviceSimulator(object):
             if show_result:
                 print('TOKEN_INVALID')
             self.invalid_token_count += 1
-            self.token_entry_blocked_until = datetime.now() + timedelta(minutes=2**self.invalid_token_count)
+            self.token_entry_blocked_until = datetime.now() + timedelta(
+                minutes=2**self.invalid_token_count
+            )
             return -1
         elif token_value == -2:
             if show_result:
@@ -78,7 +96,10 @@ class DeviceSimulator(object):
         else:
             if show_result:
                 print('TOKEN_VALID', ' | Value:', token_value)
-            if token_count > self.count or token_value == OpenPAYGOTokenShared.COUNTER_SYNC_VALUE:
+            if (
+                token_count > self.count
+                or token_value == OpenPAYGOTokenShared.COUNTER_SYNC_VALUE
+            ):
                 self.count = token_count
             self.used_counts = updated_counts
             self.invalid_token_count = 0
@@ -86,22 +107,29 @@ class DeviceSimulator(object):
             return 1
 
     def _update_device_status_from_extended_token(self, token, show_result=True):
-        if self.token_entry_blocked_until > datetime.now() and self.waiting_period_enabled:
+        if (
+            self.token_entry_blocked_until > datetime.now()
+            and self.waiting_period_enabled
+        ):
             if show_result:
                 print('TOKEN_ENTRY_BLOCKED')
 
-        token_value, token_count = OpenPAYGOTokenDecoder.get_activation_value_count_from_extended_token(
-            token=token,
-            starting_code=self.starting_code,
-            key=self.key,
-            last_count=self.count,
-            restricted_digit_set=self.restricted_digit_set
+        token_value, token_count = (
+            OpenPAYGOTokenDecoder.get_activation_value_count_from_extended_token(
+                token=token,
+                starting_code=self.starting_code,
+                key=self.key,
+                last_count=self.count,
+                restricted_digit_set=self.restricted_digit_set,
+            )
         )
         if token_value is None:
             if show_result:
                 print('TOKEN_INVALID')
             self.invalid_token_count += 1
-            self.token_entry_blocked_until = datetime.now() + timedelta(minutes=2**self.invalid_token_count)
+            self.token_entry_blocked_until = datetime.now() + timedelta(
+                minutes=2**self.invalid_token_count
+            )
         else:
             if show_result:
                 print('Special token entered, value: '+str(token_value))
