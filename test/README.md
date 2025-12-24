@@ -9,3 +9,9 @@ $ source env/bin/activate
 $ python -m pip install -e ..
 $ python simple_scenario_test.py
 ```
+
+You can do it for full test procedure as well:
+
+```
+$ python full_test_procedure.py
+```
