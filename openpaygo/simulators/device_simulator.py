@@ -31,12 +31,12 @@ class DeviceSimulator(object):
         self.used_counts = []
 
     def print_status(self):
-        print('-------------------------')
-        print('Expiration Date: '+ str(self.expiration_date))
-        print('Current count: '+str(self.count))
-        print('PAYG Enabled: '+str(self.payg_enabled))
-        print('Active: '+str(self.is_active()))
-        print('-------------------------')
+        print("-------------------------")
+        print("Expiration Date: " + str(self.expiration_date))
+        print("Current count: " + str(self.count))
+        print("PAYG Enabled: " + str(self.payg_enabled))
+        print("Active: " + str(self.is_active()))
+        print("-------------------------")
 
     def is_active(self):
         return self.expiration_date > datetime.now()
@@ -47,16 +47,18 @@ class DeviceSimulator(object):
             return self._update_device_status_from_token(token_int, show_result)
         else:
             token_int = int(token)
-            return self._update_device_status_from_extended_token(token_int, show_result)
+            return self._update_device_status_from_extended_token(
+                token_int, show_result
+            )
 
     def get_days_remaining(self):
         if self.payg_enabled:
             td = self.expiration_date - datetime.now()
-            days, hours, minutes = td.days, td.seconds//3600, (td.seconds//60)%60
-            days = days + (hours + minutes/60)/24
+            days, hours, minutes = td.days, td.seconds // 3600, (td.seconds // 60) % 60
+            days = days + (hours + minutes / 60) / 24
             return round(days)
         else:
-            return 'infinite'
+            return "infinite"
 
     def _update_device_status_from_token(self, token, show_result=True):
         if (
@@ -64,7 +66,7 @@ class DeviceSimulator(object):
             and self.waiting_period_enabled
         ):
             if show_result:
-                print('TOKEN_ENTRY_BLOCKED')
+                print("TOKEN_ENTRY_BLOCKED")
             return False
 
         token_value, token_type, token_count, updated_counts = (
@@ -80,10 +82,10 @@ class DeviceSimulator(object):
         if token_value is None:
             if token_type == TokenType.ALREADY_USED:
                 if show_result:
-                    print('OLD_TOKEN')
+                    print("OLD_TOKEN")
                 return -2
             if show_result:
-                print('TOKEN_INVALID')
+                print("TOKEN_INVALID")
             self.invalid_token_count += 1
             self.token_entry_blocked_until = datetime.now() + timedelta(
                 minutes=2**self.invalid_token_count
@@ -91,11 +93,11 @@ class DeviceSimulator(object):
             return -1
         elif token_value == -2:
             if show_result:
-                print('OLD_TOKEN')
+                print("OLD_TOKEN")
             return -2
         else:
             if show_result:
-                print('TOKEN_VALID', ' | Value:', token_value)
+                print("TOKEN_VALID", " | Value:", token_value)
             if (
                 token_count > self.count
                 or token_value == OpenPAYGOTokenShared.COUNTER_SYNC_VALUE
@@ -112,7 +114,7 @@ class DeviceSimulator(object):
             and self.waiting_period_enabled
         ):
             if show_result:
-                print('TOKEN_ENTRY_BLOCKED')
+                print("TOKEN_ENTRY_BLOCKED")
 
         token_value, token_count = (
             OpenPAYGOTokenDecoder.get_activation_value_count_from_extended_token(
@@ -125,14 +127,14 @@ class DeviceSimulator(object):
         )
         if token_value is None:
             if show_result:
-                print('TOKEN_INVALID')
+                print("TOKEN_INVALID")
             self.invalid_token_count += 1
             self.token_entry_blocked_until = datetime.now() + timedelta(
                 minutes=2**self.invalid_token_count
             )
         else:
             if show_result:
-                print('Special token entered, value: '+str(token_value))
+                print("Special token entered, value: " + str(token_value))
 
     def _update_device_status_from_token_value(self, token_value, token_type):
         if token_value <= OpenPAYGOTokenShared.MAX_ACTIVATION_VALUE:
@@ -143,14 +145,15 @@ class DeviceSimulator(object):
         elif token_value == OpenPAYGOTokenShared.PAYG_DISABLE_VALUE:
             self.payg_enabled = False
         elif token_value != OpenPAYGOTokenShared.COUNTER_SYNC_VALUE:
-            # We do nothing if its the sync counter value, the counter has been synced already
-            print('COUNTER_SYNCED')
+            # We do nothing if its the sync counter value, the counter has been synced
+            # already
+            print("COUNTER_SYNCED")
         else:
             # If it's another value we also do nothing, as they are not defined
-            print('UNKNOWN_COMMAND')
+            print("UNKNOWN_COMMAND")
 
     def _update_expiration_date_from_value(self, toke_value, token_type):
-        number_of_days = toke_value/self.time_divider
+        number_of_days = toke_value / self.time_divider
         if token_type == TokenType.SET_TIME:
             self.expiration_date = datetime.now() + timedelta(days=number_of_days)
         else:

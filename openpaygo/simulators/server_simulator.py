@@ -24,9 +24,9 @@ class SingleDeviceServerSimulator(object):
         self.restricted_digit_set = restricted_digit_set
 
     def print_status(self):
-        print('Expiration Date: '+ str(self.expiration_date))
-        print('Current count: '+str(self.count))
-        print('PAYG Enabled: '+str(self.payg_enabled))
+        print("Expiration Date: " + str(self.expiration_date))
+        print("Current count: " + str(self.count))
+        print("PAYG Enabled: " + str(self.payg_enabled))
 
     def generate_payg_disable_token(self):
         self.count, token = OpenPAYGOTokenEncoder.generate_token(
@@ -35,7 +35,7 @@ class SingleDeviceServerSimulator(object):
             value=0,
             count=self.count,
             token_type=TokenType.DISABLE_PAYG,
-            restricted_digit_set=self.restricted_digit_set
+            restricted_digit_set=self.restricted_digit_set,
         )
         return SingleDeviceServerSimulator._format_token(token)
 
@@ -46,7 +46,7 @@ class SingleDeviceServerSimulator(object):
             value=0,
             count=self.count,
             token_type=TokenType.COUNTER_SYNC,
-            restricted_digit_set=self.restricted_digit_set
+            restricted_digit_set=self.restricted_digit_set,
         )
         return SingleDeviceServerSimulator._format_token(token)
 
@@ -77,7 +77,7 @@ class SingleDeviceServerSimulator(object):
             value=value,
             count=self.count,
             token_type=mode,
-            restricted_digit_set=self.restricted_digit_set
+            restricted_digit_set=self.restricted_digit_set,
         )
         return SingleDeviceServerSimulator._format_token(token)
 
@@ -89,10 +89,10 @@ class SingleDeviceServerSimulator(object):
             return 0
         else:
             days = self._timedelta_to_days(new_time - reference_time)
-            value = int(round(days*self.time_divider, 0))
+            value = int(round(days * self.time_divider, 0))
             if value > OpenPAYGOTokenShared.MAX_ACTIVATION_VALUE:
                 if not force_maximum:
-                    raise Exception('TOO_MANY_DAYS_TO_ACTIVATE')
+                    raise Exception("TOO_MANY_DAYS_TO_ACTIVATE")
                 else:
                     # Will need to be activated again after those days
                     return OpenPAYGOTokenShared.MAX_ACTIVATION_VALUE
@@ -106,5 +106,5 @@ class SingleDeviceServerSimulator(object):
     def _format_token(token):
         token = str(token)
         if len(token) < 9:
-            token = '0' * (9 - len(token)) + token
+            token = "0" * (9 - len(token)) + token
         return token
