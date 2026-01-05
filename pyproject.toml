@@ -45,11 +45,12 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://enaccess.github.io/OpenPAYGO-docs/"
-Documentation = "https://enaccess.github.io/OpenPAYGO-docs/"
-Changes = "https://github.com/EnAccess/OpenPAYGO-python/releases"
-Source = "https://github.com/EnAccess/OpenPAYGO-python/"
-Issues = "https://github.com/EnAccess/OpenPAYGO-python/issues"
+homepage = "https://enaccess.github.io/OpenPAYGO-docs/"
+source = "https://github.com/EnAccess/OpenPAYGO-python/"
+changelog = "https://github.com/EnAccess/OpenPAYGO-python/releases"
+releasenotes = "https://github.com/EnAccess/OpenPAYGO-python/releases"
+documentation = "https://enaccess.github.io/OpenPAYGO-docs/"
+issues = "https://github.com/EnAccess/OpenPAYGO-python/issues"
 
 [tool.setuptools]
 include-package-data = true
