@@ -72,7 +72,7 @@ The **OpenPAYGO Python library** supports the following features:
 ## Table of Contents
 
 - [Key Features](#key-features)
-- [Installing the library](#installing-the-library)
+- [Installing the library](#installing-the-openpaygo-python-library)
 - [Getting Started - OpenPAYGO Token](#getting-started---openpaygo-token)
   - [Generating Tokens (Server Side)](#generating-tokens-server-side)
   - [Decoding Tokens (Device Side)](#decoding-tokens-device-side)
