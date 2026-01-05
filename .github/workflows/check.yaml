@@ -43,8 +43,6 @@ jobs:
           - "3.13"
           - "3.14"
           - "3.15"
-        os:
-          - ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5
