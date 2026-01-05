@@ -36,9 +36,13 @@ jobs:
     strategy:
       matrix:
         python-version:
+          - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
+          - "3.14"
+          - "3.15"
 
     steps:
       - uses: actions/checkout@v5
@@ -50,6 +54,9 @@ jobs:
 
       - name: Set up Python
         run: uv python install
+
+      - name: Check Python version in uv
+        run: uv run python --version
 
       - name: Install dependencies
         run: uv sync
