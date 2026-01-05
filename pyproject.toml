@@ -56,6 +56,7 @@ Documentation = "https://enaccess.github.io/OpenPAYGO-docs/"
 Repository = "https://github.com/EnAccess/OpenPAYGO-python/"
 Issues = "https://github.com/EnAccess/OpenPAYGO-python/issues"
 Changelog = "https://github.com/EnAccess/OpenPAYGO-python/releases"
+Funding = "https://github.com/sponsors/EnAccess"
 
 [tool.setuptools]
 include-package-data = true
