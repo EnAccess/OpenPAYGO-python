@@ -53,7 +53,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        run: uv python install
 
       - name: Check Python version in uv
         run: uv run python --version
