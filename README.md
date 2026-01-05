@@ -87,7 +87,16 @@ The **OpenPAYGO Python library** supports the following features:
 
 ## Installing the library
 
-You can install the library by running `pip install openpaygo` or adding `openpaygo` in your requirements.txt file and running `pip install -r requirements.txt`.
+### Released version from PyPI
+
+You can install `OpenPAYGO-python` from [PyPI](https://pypi.org/project/openpaygo/).
+For example by running `pip install openpaygo` or adding `openpaygo` as a dependency (`uv add openpaygo`).
+
+### Development setup
+
+- Install [`uv`](https://docs.astral.sh/uv/)
+- Run `uv install`
+- Run `uv tests`
 
 ## Getting Started - OpenPAYGO Token
 
