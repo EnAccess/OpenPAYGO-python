@@ -72,7 +72,7 @@ The **OpenPAYGO Python library** supports the following features:
 ## Table of Contents
 
 - [Key Features](#key-features)
-- [Installing the library](#installing-the-library)
+- [Installing the library](#installing-the-openpaygo-python-library)
 - [Getting Started - OpenPAYGO Token](#getting-started---openpaygo-token)
   - [Generating Tokens (Server Side)](#generating-tokens-server-side)
   - [Decoding Tokens (Device Side)](#decoding-tokens-device-side)
@@ -85,9 +85,31 @@ The **OpenPAYGO Python library** supports the following features:
 - Implements token generation and decoding with full support for the v2.3 of the [OpenPAYGO Token](https://github.com/EnAccess/OpenPAYGO-Token) specifications.
 - Implements payload authentication (verification + signing) and conversion from simple to condensed payload (and back) with full support of the v1.0-rc1 of the [OpenPAYGO Metrics](https://github.com/openpaygo/metrics) specifications.
 
-## Installing the library
+## Installing the OpenPAYGO Python library
 
-You can install the library by running `pip install openpaygo` or adding `openpaygo` in your requirements.txt file and running `pip install -r requirements.txt`.
+### Released version from PyPI
+
+The easiest and recommended way to install the OpenPAYGO Python library is via [PyPI](https://pypi.org/project/openpaygo/).
+
+You can install it directly using a package manager, for example:
+
+- By adding openpaygo to your project dependencies, via:
+
+  ```sh
+  uv add openpaygo
+  ```
+
+- Or via `pip`
+
+  ```sh
+  pip install openpaygo
+  ```
+
+### Development setup
+
+- Install [`uv`](https://docs.astral.sh/uv/)
+- Run `uv sync`
+- Run `uv run pytest`
 
 ## Getting Started - OpenPAYGO Token
 
