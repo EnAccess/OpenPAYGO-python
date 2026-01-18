@@ -149,7 +149,7 @@ class OpenPAYGOTokenDecoder(object):
 
     @classmethod
     def update_used_counts(cls, past_used_counts, value, new_count, type):
-        if past_used_counts is None:
+        if not past_used_counts: 
             return None
         highest_count = max(past_used_counts) if past_used_counts else 0
         if new_count > highest_count:

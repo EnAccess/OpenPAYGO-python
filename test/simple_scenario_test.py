@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from openpaygo.simulators import DeviceSimulator, SingleDeviceServerSimulator
+from test.simulators import DeviceSimulator, SingleDeviceServerSimulator
 from openpaygo.token_shared import TokenType
 
 

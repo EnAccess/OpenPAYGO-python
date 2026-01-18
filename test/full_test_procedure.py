@@ -10,7 +10,7 @@ from helpers import (
     test_name,
 )
 
-from openpaygo.simulators.device_simulator import DeviceSimulator
+from test.simulators.device_simulator import DeviceSimulator
 
 # This tests the device simulator against the full test procedure
 
