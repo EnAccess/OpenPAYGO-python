@@ -14,8 +14,7 @@ Most documentation is currently written in Markdown, making it easy to add, modi
 
 ## Issues
 
-Create new issues in the
-[issue tracker](https://github.com/EnAccess/OpenPAYGO-python/issues/new/choose)
+Issues are created [here](https://github.com/EnAccess/OpenPAYGO-python/issues/new/choose)
 
 ### How to Contribute to Issues
 

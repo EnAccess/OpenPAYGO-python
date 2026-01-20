@@ -61,31 +61,14 @@ class OpenPAYGOTokenShared(object):
 
     @classmethod
     def load_secret_key_from_hex(cls, secret_key):
-        if isinstance(secret_key, (bytes, bytearray)):
-            secret_key_bytes = bytes(secret_key)
-            if len(secret_key_bytes) != 16:
-                raise ValueError(
-                    "The secret key provided is not correctly formatted, it should be "
-                    "16 "
-                    "bytes. "
-                )
-            return secret_key_bytes
 
         try:
-            decoded = codecs.decode(secret_key, "hex")
+            return codecs.decode(secret_key, "hex")
         except Exception:
             raise ValueError(
                 "The secret key provided is not correctly formatted, it should be 32 "
                 "hexadecimal characters. "
             )
-
-        if len(decoded) != 16:
-            raise ValueError(
-                "The secret key provided is not correctly formatted, it should be 32 "
-                "hexadecimal characters. "
-            )
-
-        return decoded
 
     @classmethod
     def _convert_to_29_5_bits(cls, source):

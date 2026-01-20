@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
-from test.simulators import DeviceSimulator, SingleDeviceServerSimulator
 from openpaygo.token_shared import TokenType
+from test.simulators import DeviceSimulator, SingleDeviceServerSimulator
 
 
 def assert_time_equals(time1, time2):
