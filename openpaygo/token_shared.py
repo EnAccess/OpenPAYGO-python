@@ -61,7 +61,6 @@ class OpenPAYGOTokenShared(object):
 
     @classmethod
     def load_secret_key_from_hex(cls, secret_key):
-
         try:
             return codecs.decode(secret_key, "hex")
         except Exception:
