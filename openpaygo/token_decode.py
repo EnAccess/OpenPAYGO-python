@@ -134,6 +134,7 @@ class OpenPAYGOTokenDecoder(object):
 
     @classmethod
     def _count_is_valid(cls, count, last_count, value, type, used_counts):
+
         if value == OpenPAYGOTokenShared.COUNTER_SYNC_VALUE:
             if count > (last_count - cls.MAX_TOKEN_JUMP):
                 return True
