@@ -15,10 +15,10 @@ def decode_token(**kwargs):
 
 
 __all__ = [
-    MetricsRequestHandler,
-    MetricsResponseHandler,
-    AuthMethod,
-    OpenPAYGOTokenDecoder,
-    OpenPAYGOTokenEncoder,
-    TokenType,
+    "MetricsRequestHandler",
+    "MetricsResponseHandler",
+    "AuthMethod",
+    "OpenPAYGOTokenDecoder",
+    "OpenPAYGOTokenEncoder",
+    "TokenType",
 ]

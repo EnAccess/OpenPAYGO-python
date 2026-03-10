@@ -128,9 +128,7 @@ if __name__ == "__main__":
     )
 
     print("\n")
-    print(
-        "Server: We generate a bunch of 1 day tokens, but only enter the latest " "one"
-    )
+    print("Server: We generate a bunch of 1 day tokens, but only enter the latest one")
     server_simulator.generate_token_from_date(datetime.now() + timedelta(days=1))
     server_simulator.generate_token_from_date(datetime.now() + timedelta(days=1))
     server_simulator.generate_token_from_date(datetime.now() + timedelta(days=1))
@@ -202,9 +200,7 @@ if __name__ == "__main__":
     device_simulator.enter_token(token_4)
     device_simulator.enter_token(token_3)
     device_simulator.enter_token(token_2)
-    print(
-        "Device: We check the device status , it should have +4 days (6 days " "total)"
-    )
+    print("Device: We check the device status , it should have +4 days (6 days total)")
     device_simulator.print_status()
     assert_time_equals(
         device_simulator.expiration_date, datetime.now() + timedelta(days=6)

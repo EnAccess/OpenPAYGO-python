@@ -1,3 +1,5 @@
+from typing import List, Optional, Tuple, Union
+
 from .token_shared import OpenPAYGOTokenShared, TokenType
 from .token_shared_extended import OpenPAYGOTokenSharedExtended
 
@@ -10,43 +12,43 @@ class OpenPAYGOTokenDecoder(object):
     @classmethod
     def decode_token(
         cls,
-        token,
-        secret_key,
-        count,
-        used_counts=None,
-        starting_code=None,
-        value_divider=1,
-        restricted_digit_set=False,
-    ):
-        secret_key = OpenPAYGOTokenShared.load_secret_key_from_hex(secret_key)
+        token: Union[str, int],
+        secret_key: str,
+        count: int,
+        used_counts: Optional[List[int]] = None,
+        starting_code: Optional[int] = None,
+        value_divider: int = 1,
+        restricted_digit_set: bool = False,
+    ) -> Tuple[Optional[Union[int, float]], int, Optional[int], Optional[List[int]]]:
+        secret_key_bytes = OpenPAYGOTokenShared.load_secret_key_from_hex(secret_key)
         if not starting_code:
             # We generate the starting code from the key if not provided
-            starting_code = OpenPAYGOTokenShared.generate_starting_code(secret_key)
+            starting_code = OpenPAYGOTokenShared.generate_starting_code(secret_key_bytes)
         if not restricted_digit_set:
-            if len(token) <= 9:
+            if len(str(token)) <= 9:
                 extended_token = False
-            elif len(token) <= 12:
+            elif len(str(token)) <= 12:
                 extended_token = True
             else:
                 raise ValueError("Token is too long")
         elif restricted_digit_set:
-            if len(token) <= 15:
+            if len(str(token)) <= 15:
                 extended_token = False
-            elif len(token) <= 20:
+            elif len(str(token)) <= 20:
                 extended_token = True
             else:
                 raise ValueError("Token is too long")
-        token = int(token)
+        token_int = int(token)
         if not extended_token:
             (
                 value,
                 token_type,
-                count,
+                returned_count,
                 updated_counts,
             ) = cls.get_activation_value_count_and_type_from_token(
-                token,
+                token_int,
                 starting_code,
-                secret_key,
+                secret_key_bytes,
                 count,
                 restricted_digit_set,
                 used_counts,
@@ -55,30 +57,30 @@ class OpenPAYGOTokenDecoder(object):
             (
                 value,
                 token_type,
-                count,
+                returned_count,
                 updated_counts,
             ) = cls.get_activation_value_count_from_extended_token(
-                token,
+                token_int,
                 starting_code,
-                secret_key,
+                secret_key_bytes,
                 count,
                 restricted_digit_set,
                 used_counts,
             )
         if value and value_divider:
             value = value / value_divider
-        return value, token_type, count, updated_counts
+        return value, token_type, returned_count, updated_counts
 
     @classmethod
     def get_activation_value_count_and_type_from_token(
         cls,
-        token,
-        starting_code,
-        key,
-        last_count,
-        restricted_digit_set=False,
-        used_counts=None,
-    ):
+        token: int,
+        starting_code: int,
+        key: bytes,
+        last_count: int,
+        restricted_digit_set: bool = False,
+        used_counts: Optional[List[int]] = None,
+    ) -> Tuple[Optional[Union[int, float]], int, Optional[int], Optional[List[int]]]:
         if restricted_digit_set:
             token = OpenPAYGOTokenShared.convert_from_4_digit_token(token)
         valid_older_token = False
@@ -133,21 +135,34 @@ class OpenPAYGOTokenDecoder(object):
         return None, TokenType.INVALID, None, None
 
     @classmethod
-    def _count_is_valid(cls, count, last_count, value, type, used_counts):
+    def _count_is_valid(
+        cls,
+        count: int,
+        last_count: int,
+        value: int,
+        type: int,
+        used_counts: Optional[List[int]],
+    ) -> bool:
 
         if value == OpenPAYGOTokenShared.COUNTER_SYNC_VALUE:
             if count > (last_count - cls.MAX_TOKEN_JUMP):
                 return True
         elif count > last_count:
             return True
-        elif cls.MAX_UNUSED_OLDER_TOKENS > 0:
+        elif cls.MAX_UNUSED_OLDER_TOKENS > 0 and used_counts is not None:
             if count > last_count - cls.MAX_UNUSED_OLDER_TOKENS:
                 if count not in used_counts and type == TokenType.ADD_TIME:
                     return True
         return False
 
     @classmethod
-    def update_used_counts(cls, past_used_counts, value, new_count, type):
+    def update_used_counts(
+        cls,
+        past_used_counts: Optional[List[int]],
+        value: int,
+        new_count: int,
+        type: int,
+    ) -> Optional[List[int]]:
         if not past_used_counts:
             return None
         highest_count = max(past_used_counts) if past_used_counts else 0
@@ -173,7 +188,7 @@ class OpenPAYGOTokenDecoder(object):
         return used_counts
 
     @classmethod
-    def _decode_base(cls, starting_code_base, token_base):
+    def _decode_base(cls, starting_code_base: int, token_base: int) -> int:
         decoded_value = token_base - starting_code_base
         if decoded_value < 0:
             return decoded_value + 1000
@@ -183,13 +198,13 @@ class OpenPAYGOTokenDecoder(object):
     @classmethod
     def get_activation_value_count_from_extended_token(
         cls,
-        token,
-        starting_code,
-        key,
-        last_count,
-        restricted_digit_set=False,
-        used_counts=None,
-    ):
+        token: int,
+        starting_code: int,
+        key: bytes,
+        last_count: int,
+        restricted_digit_set: bool = False,
+        used_counts: Optional[List[int]] = None,
+    ) -> Tuple[Optional[Union[int, float]], int, Optional[int], Optional[List[int]]]:
         if restricted_digit_set:
             token = OpenPAYGOTokenSharedExtended.convert_from_4_digit_token(token)
         token_base = OpenPAYGOTokenSharedExtended.get_token_base(
@@ -231,7 +246,7 @@ class OpenPAYGOTokenDecoder(object):
         return None, TokenType.INVALID, None, None
 
     @classmethod
-    def _decode_base_extended(cls, starting_code_base, token_base):
+    def _decode_base_extended(cls, starting_code_base: int, token_base: int) -> int:
         decoded_value = token_base - starting_code_base
         if decoded_value < 0:
             return decoded_value + 1000000
