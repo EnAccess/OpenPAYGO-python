@@ -1,19 +1,21 @@
 import copy
 import json
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Union
 
 from .metrics_shared import OpenPAYGOMetricsShared
+from .models import MetricsDataFormat
 
 
 class MetricsResponseHandler(object):
     def __init__(
         self,
-        received_metrics,
-        data_format=None,
-        secret_key=None,
-        last_request_count=None,
-        last_request_timestamp=None,
-    ):
+        received_metrics: str,
+        data_format: Optional[Union[Dict[str, Any], MetricsDataFormat]] = None,
+        secret_key: Optional[str] = None,
+        last_request_count: Optional[int] = None,
+        last_request_timestamp: Optional[int] = None,
+    ) -> None:
         self.received_metrics = received_metrics
         self.request_dict = json.loads(received_metrics)
         # We convert the base variable names to simple
@@ -26,40 +28,45 @@ class MetricsResponseHandler(object):
             self.timestamp = int(datetime.now().timestamp())
         else:
             self.timestamp = self.request_dict.get("timestamp")
-        self.response_dict = {}
+        self.response_dict: Dict[str, Any] = {}
         self.secret_key = secret_key
-        self.data_format = data_format
         self.last_request_count = last_request_count
         self.last_request_timestamp = last_request_timestamp
+
+        if data_format is not None:
+            self.data_format: Optional[Dict[str, Any]] = dict(data_format)
+        else:
+            self.data_format = None
+
         if not self.data_format and self.request_dict.get("data_format"):
             self.data_format = self.request_dict.get("data_format")
 
-    def get_device_serial(self):
+    def get_device_serial(self) -> str:
         return self.request_dict.get("serial_number")
 
-    def get_data_format_id(self):
+    def get_data_format_id(self) -> Optional[int]:
         return self.request_dict.get("data_format_id")
 
-    def data_format_available(self):
+    def data_format_available(self) -> bool:
         return self.data_format is not None
 
     def set_device_parameters(
         self,
-        secret_key=None,
-        data_format=None,
-        last_request_count=None,
-        last_request_timestamp=None,
-    ):
+        secret_key: Optional[str] = None,
+        data_format: Optional[Union[Dict[str, Any], MetricsDataFormat]] = None,
+        last_request_count: Optional[int] = None,
+        last_request_timestamp: Optional[int] = None,
+    ) -> None:
         if secret_key:
             self.secret_key = secret_key
-        if data_format:
-            self.data_format = data_format
+        if data_format is not None:
+            self.data_format = dict(data_format)
         if last_request_count:
             self.last_request_count = last_request_count
         if last_request_timestamp:
             self.last_request_timestamp = last_request_timestamp
 
-    def is_auth_valid(self):
+    def is_auth_valid(self) -> bool:
         auth_string = self.request_dict.get("auth", None)
         if not auth_string:
             return False
@@ -89,7 +96,7 @@ class MetricsResponseHandler(object):
                 return True
         return False
 
-    def get_simple_metrics(self):
+    def get_simple_metrics(self) -> Dict[str, Any]:
         # We start the process by making a copy of the dict to work with
         simple_dict = copy.deepcopy(self.request_dict)
         simple_dict.pop("auth") if "auth" in simple_dict else None  # We remove the auth
@@ -103,26 +110,26 @@ class MetricsResponseHandler(object):
         )
         return simple_dict
 
-    def get_data_timestamp(self):
+    def get_data_timestamp(self) -> int:
         return self.request_dict.get("data_collection_timestamp", self.timestamp)
 
-    def get_request_timestamp(self):
+    def get_request_timestamp(self) -> Optional[int]:
         return self.request_timestamp
 
-    def get_request_count(self):
+    def get_request_count(self) -> Optional[int]:
         return self.request_dict.get("request_count")
 
-    def get_token_count(self):
+    def get_token_count(self) -> Optional[int]:
         data = self._get_simple_data()
         return data.get("token_count")
 
-    def expects_token_answer(self):
+    def expects_token_answer(self) -> bool:
         return self.get_token_count() is not None
 
-    def add_tokens_to_answer(self, token_list):
+    def add_tokens_to_answer(self, token_list: List[str]) -> None:
         self.response_dict["token_list"] = token_list
 
-    def expects_time_answer(self):
+    def expects_time_answer(self) -> bool:
         data = self._get_simple_data()
         if data.get("active_until_timestamp_requested", False) or data.get(
             "active_seconds_left_requested", False
@@ -130,13 +137,13 @@ class MetricsResponseHandler(object):
             return True
         return False
 
-    def add_time_to_answer(self, target_datetime):
+    def add_time_to_answer(self, target_datetime: datetime) -> None:
         data = self._get_simple_data()
         if data.get("active_until_timestamp_requested", False):
             target_timestamp = 0
             if target_datetime:
                 if target_datetime.year > 1970:
-                    target_timestamp = target_datetime.timestamp()
+                    target_timestamp = int(target_datetime.timestamp())
             self.response_dict["active_until_timestamp"] = target_timestamp
         elif data.get("active_seconds_left_requested", False):
             seconds_left = (
@@ -150,24 +157,24 @@ class MetricsResponseHandler(object):
         else:
             raise ValueError("No time requested")
 
-    def add_new_base_url_to_answer(self, new_base_url):
+    def add_new_base_url_to_answer(self, new_base_url: str) -> None:
         self.add_settings_to_answer({"base_url": new_base_url})
 
-    def add_settings_to_answer(self, settings_dict):
+    def add_settings_to_answer(self, settings_dict: Dict[str, Any]) -> None:
         if not self.response_dict.get("settings"):
             self.response_dict["settings"] = {}
         self.response_dict["settings"].update(settings_dict)
 
-    def add_extra_data_to_answer(self, extra_data_dict):
+    def add_extra_data_to_answer(self, extra_data_dict: Dict[str, Any]) -> None:
         if not self.response_dict.get("extra_data"):
             self.response_dict["extra_data"] = {}
         self.response_dict["extra_data"].update(extra_data_dict)
 
-    def get_answer_payload(self):
+    def get_answer_payload(self) -> str:
         payload = self.get_answer_dict()
         return OpenPAYGOMetricsShared.convert_to_metrics_json(payload)
 
-    def get_answer_dict(self):
+    def get_answer_dict(self) -> Dict[str, Any]:
         # If there is not data format, we just return the full response
         condensed_answer = copy.deepcopy(self.response_dict)
         if self.secret_key:

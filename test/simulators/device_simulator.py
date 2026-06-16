@@ -5,7 +5,6 @@ from openpaygo.token_shared import OpenPAYGOTokenShared
 
 
 class DeviceSimulator(object):
-
     def __init__(
         self,
         starting_code,
