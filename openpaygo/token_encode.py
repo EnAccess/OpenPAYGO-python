@@ -1,3 +1,5 @@
+from typing import Optional, Tuple
+
 from .token_shared import OpenPAYGOTokenShared, TokenType
 from .token_shared_extended import OpenPAYGOTokenSharedExtended
 
@@ -6,20 +8,22 @@ class OpenPAYGOTokenEncoder(object):
     @classmethod
     def generate_token(
         cls,
-        secret_key,
-        count,
-        value=None,
-        token_type=TokenType.ADD_TIME,
-        starting_code=None,
-        value_divider=1,
-        restricted_digit_set=False,
-        extended_token=False,
-    ):
-        secret_key = OpenPAYGOTokenShared.load_secret_key_from_hex(secret_key)
+        secret_key: str,
+        count: int,
+        value: Optional[int] = None,
+        token_type: int = TokenType.ADD_TIME,
+        starting_code: Optional[int] = None,
+        value_divider: int = 1,
+        restricted_digit_set: bool = False,
+        extended_token: bool = False,
+    ) -> Tuple[int, str]:
+        secret_key_bytes = OpenPAYGOTokenShared.load_secret_key_from_hex(secret_key)
         if not starting_code:
             # We generate the starting code from the key if not provided
-            starting_code = OpenPAYGOTokenShared.generate_starting_code(secret_key)
+            starting_code = OpenPAYGOTokenShared.generate_starting_code(secret_key_bytes)
         if token_type in [TokenType.ADD_TIME, TokenType.SET_TIME]:
+            if value is None:
+                raise ValueError("Value must be provided for ADD_TIME or SET_TIME tokens")
             value = int(round(value * value_divider, 0))
             if not extended_token:
                 max_value = OpenPAYGOTokenShared.MAX_ACTIVATION_VALUE
@@ -39,7 +43,7 @@ class OpenPAYGOTokenEncoder(object):
         if extended_token:
             return cls.generate_extended_token(
                 starting_code,
-                secret_key,
+                secret_key_bytes,
                 value,
                 count,
                 token_type,
@@ -48,7 +52,7 @@ class OpenPAYGOTokenEncoder(object):
         else:
             return cls.generate_standard_token(
                 starting_code,
-                secret_key,
+                secret_key_bytes,
                 value,
                 count,
                 token_type,
@@ -58,13 +62,13 @@ class OpenPAYGOTokenEncoder(object):
     @classmethod
     def generate_standard_token(
         cls,
-        starting_code=None,
-        key=None,
-        value=None,
-        count=None,
-        mode=TokenType.ADD_TIME,
-        restricted_digit_set=False,
-    ):
+        starting_code: int,
+        key: bytes,
+        value: int,
+        count: int,
+        mode: int = TokenType.ADD_TIME,
+        restricted_digit_set: bool = False,
+    ) -> Tuple[int, str]:
         # We get the first 3 digits with encoded value
         starting_code_base = OpenPAYGOTokenShared.get_token_base(starting_code)
         token_base = cls._encode_base(starting_code_base, value)
@@ -74,16 +78,16 @@ class OpenPAYGOTokenEncoder(object):
         new_count = cls._get_new_count(count, mode)
         for xn in range(0, new_count):
             current_token = OpenPAYGOTokenShared.generate_next_token(current_token, key)
-        final_token = OpenPAYGOTokenShared.put_base_in_token(current_token, token_base)
+        final_token_int = OpenPAYGOTokenShared.put_base_in_token(current_token, token_base)
         if restricted_digit_set:
-            final_token = OpenPAYGOTokenShared.convert_to_4_digit_token(final_token)
-            final_token = "{:015d}".format(final_token)
+            final_token_int = OpenPAYGOTokenShared.convert_to_4_digit_token(final_token_int)
+            final_token = "{:015d}".format(final_token_int)
         else:
-            final_token = "{:09d}".format(final_token)
+            final_token = "{:09d}".format(final_token_int)
         return new_count, final_token
 
     @classmethod
-    def _encode_base(cls, base, number):
+    def _encode_base(cls, base: int, number: int) -> int:
         if number + base > 999:
             return number + base - 1000
         else:
@@ -92,13 +96,13 @@ class OpenPAYGOTokenEncoder(object):
     @classmethod
     def generate_extended_token(
         cls,
-        starting_code,
-        key,
-        value,
-        count,
-        mode=TokenType.ADD_TIME,
-        restricted_digit_set=False,
-    ):
+        starting_code: int,
+        key: bytes,
+        value: int,
+        count: int,
+        mode: int = TokenType.ADD_TIME,
+        restricted_digit_set: bool = False,
+    ) -> Tuple[int, str]:
         starting_code_base = OpenPAYGOTokenSharedExtended.get_token_base(starting_code)
         token_base = cls._encode_base_extended(starting_code_base, value)
         current_token = OpenPAYGOTokenSharedExtended.put_base_in_token(
@@ -109,27 +113,27 @@ class OpenPAYGOTokenEncoder(object):
             current_token = OpenPAYGOTokenSharedExtended.generate_next_token(
                 current_token, key
             )
-        final_token = OpenPAYGOTokenSharedExtended.put_base_in_token(
+        final_token_int = OpenPAYGOTokenSharedExtended.put_base_in_token(
             current_token, token_base
         )
         if restricted_digit_set:
-            final_token = OpenPAYGOTokenSharedExtended.convert_to_4_digit_token(
-                final_token
+            final_token_int = OpenPAYGOTokenSharedExtended.convert_to_4_digit_token(
+                final_token_int
             )
-            final_token = "{:020d}".format(final_token)
+            final_token = "{:020d}".format(final_token_int)
         else:
-            final_token = "{:012d}".format(final_token)
+            final_token = "{:012d}".format(final_token_int)
         return new_count, final_token
 
     @classmethod
-    def _encode_base_extended(cls, base, number):
+    def _encode_base_extended(cls, base: int, number: int) -> int:
         if number + base > 999999:
             return number + base - 1000000
         else:
             return number + base
 
     @classmethod
-    def _get_new_count(cls, count, mode):
+    def _get_new_count(cls, count: int, mode: int) -> int:
         current_count_odd = count % 2
         if mode in [TokenType.SET_TIME, TokenType.DISABLE_PAYG, TokenType.COUNTER_SYNC]:
             if (

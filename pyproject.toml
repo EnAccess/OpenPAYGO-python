@@ -66,6 +66,7 @@ zip-safe = false
 where = ["."]
 
 [tool.ruff]
+[tool.ruff.lint]
 # Add some rules to ruff's default:
 # - isort: https://docs.astral.sh/ruff/rules/#isort-i
 # - pep8-naming: https://docs.astral.sh/ruff/rules/#pep8-naming-n
@@ -73,3 +74,9 @@ select = ["E", "F", "I", "N"]
 
 # Same as Black.
 line-length = 88
+
+[tool.mypy]
+
+[[tool.mypy.overrides]]
+module = "siphash"
+ignore_missing_imports = true

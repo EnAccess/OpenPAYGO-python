@@ -1,50 +1,67 @@
 import copy
+from typing import Any, Dict, List, Optional, Union
 
 from .metrics_shared import OpenPAYGOMetricsShared
+from .models import MetricsDataFormat, MetricsHistoricalDataStep
 
 
 class MetricsRequestHandler(object):
     def __init__(
-        self, serial_number, data_format=None, secret_key=None, auth_method=None
-    ):
+        self,
+        serial_number: str,
+        data_format: Optional[Union[Dict[str, Any], MetricsDataFormat]] = None,
+        secret_key: Optional[str] = None,
+        auth_method: Optional[str] = None,
+    ) -> None:
         self.secret_key = secret_key
         self.auth_method = auth_method
-        self.request_dict = {
+        self.request_dict: Dict[str, Any] = {
             "serial_number": serial_number,
         }
-        self.data_format = data_format
+        if data_format is not None:
+            self.data_format: Optional[Dict[str, Any]] = dict(data_format)
+        else:
+            self.data_format = None
+
         if self.data_format:
             if self.data_format.get("id"):
-                self.request_dict["data_format_id"] = data_format.get("id")
+                self.request_dict["data_format_id"] = self.data_format.get("id")
             else:
-                self.request_dict["data_format"] = data_format
-        self.data = {}
-        self.historical_data = {}
+                self.request_dict["data_format"] = self.data_format
+        self.data: Dict[str, Any] = {}
+        self.historical_data: List[Dict[str, Any]] = []
 
-    def set_request_count(self, request_count):
+    def set_request_count(self, request_count: int) -> None:
         self.request_dict["request_count"] = request_count
 
-    def set_timestamp(self, timestamp):
+    def set_timestamp(self, timestamp: int) -> None:
         self.request_dict["timestamp"] = timestamp
 
-    def set_data(self, data):
+    def set_data(self, data: Dict[str, Any]) -> None:
         self.data = data
 
-    def set_historical_data(self, historical_data):
-        if not self.data_format.get("historical_data_interval"):
-            for time_step in historical_data:
+    def set_historical_data(
+        self, historical_data: List[Union[Dict[str, Any], MetricsHistoricalDataStep]]
+    ) -> None:
+        validated_historical_data = []
+        for time_step in historical_data:
+            step = dict(time_step)
+            validated_historical_data.append(step)
+
+        if self.data_format and not self.data_format.get("historical_data_interval"):
+            for time_step in validated_historical_data:
                 if not time_step.get("timestamp"):
                     raise ValueError(
                         "Historical Data objects must have a time stamp if no "
                         "historical_data_interval is defined."
                     )
-        self.historical_data = historical_data
+        self.historical_data = validated_historical_data
 
-    def get_simple_request_payload(self):
+    def get_simple_request_payload(self) -> str:
         payload = self.get_simple_request_dict()
         return OpenPAYGOMetricsShared.convert_to_metrics_json(payload)
 
-    def get_simple_request_dict(self):
+    def get_simple_request_dict(self) -> Dict[str, Any]:
         simple_request = self.request_dict
         simple_request["data"] = self.data
         simple_request["historical_data"] = self.historical_data
@@ -57,17 +74,17 @@ class MetricsRequestHandler(object):
             )
         return simple_request
 
-    def get_condensed_request_payload(self):
+    def get_condensed_request_payload(self) -> str:
         payload = self.get_condensed_request_dict()
         return OpenPAYGOMetricsShared.convert_to_metrics_json(payload)
 
-    def get_condensed_request_dict(self):
+    def get_condensed_request_dict(self) -> Dict[str, Any]:
         if not self.data_format:
             raise ValueError("No Data Format provided for condensed request")
-        data_order = self.data_format.get("data_order")
+        data_order = self.data_format.get("data_order") or []
         if self.data and not data_order:
             raise ValueError("Data Format does not contain data_order")
-        historical_data_order = self.data_format.get("historical_data_order")
+        historical_data_order = self.data_format.get("historical_data_order") or []
         if self.historical_data and not historical_data_order:
             raise ValueError("Data Format does not contain historical_data_order")
         condensed_request = copy.deepcopy(self.request_dict)

@@ -5,7 +5,6 @@ from openpaygo.token_shared import OpenPAYGOTokenShared, TokenType
 
 
 class SingleDeviceServerSimulator(object):
-
     def __init__(
         self,
         starting_code,

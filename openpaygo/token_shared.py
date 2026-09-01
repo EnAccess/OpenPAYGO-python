@@ -1,5 +1,6 @@
 import codecs
 import struct
+from typing import List, Union
 
 import siphash
 
@@ -21,17 +22,17 @@ class OpenPAYGOTokenShared(object):
     TOKEN_VALUE_OFFSET = 1000
 
     @classmethod
-    def get_token_base(cls, code):
+    def get_token_base(cls, code: Union[int, str]) -> int:
         return int(code) % cls.TOKEN_VALUE_OFFSET
 
     @classmethod
-    def put_base_in_token(cls, token, token_base):
+    def put_base_in_token(cls, token: int, token_base: int) -> int:
         if token_base > cls.MAX_BASE:
             Exception("INVALID_VALUE")
         return token - cls.get_token_base(token) + token_base
 
     @classmethod
-    def generate_next_token(cls, last_code, key):
+    def generate_next_token(cls, last_code: int, key: bytes) -> int:
         conformed_token = struct.pack(">L", last_code)  # We convert the token to bytes
         conformed_token += conformed_token  # We duplicate it to fit the minimum length
         token_hash = cls.generate_hash(key, conformed_token)  # We hash it
@@ -41,7 +42,7 @@ class OpenPAYGOTokenShared(object):
         return new_token
 
     @classmethod
-    def convert_hash_to_token(cls, this_hash):
+    def convert_hash_to_token(cls, this_hash: int) -> int:
         hash_int = struct.pack(">Q", this_hash)  # We convert the hash to bytes
         hi_hash = struct.unpack(">L", hash_int[0:4])[0]  # We split it in two 32bits INT
         lo_hash = struct.unpack(">L", hash_int[4:8])[0]
@@ -54,13 +55,13 @@ class OpenPAYGOTokenShared(object):
         return token
 
     @classmethod
-    def generate_starting_code(cls, key):
+    def generate_starting_code(cls, key: bytes) -> int:
         # We make a hash of the key
         starting_hash = OpenPAYGOTokenShared.generate_hash(key, key)
         return OpenPAYGOTokenShared.convert_hash_to_token(starting_hash)
 
     @classmethod
-    def load_secret_key_from_hex(cls, secret_key):
+    def load_secret_key_from_hex(cls, secret_key: str) -> bytes:
         try:
             return codecs.decode(secret_key, "hex")
         except Exception:
@@ -70,7 +71,7 @@ class OpenPAYGOTokenShared(object):
             )
 
     @classmethod
-    def _convert_to_29_5_bits(cls, source):
+    def _convert_to_29_5_bits(cls, source: int) -> int:
         mask = ((1 << (32 - 2 + 1)) - 1) << 2
         temp = (source & mask) >> 2
         if temp > 999999999:
@@ -78,7 +79,7 @@ class OpenPAYGOTokenShared(object):
         return temp
 
     @classmethod
-    def convert_to_4_digit_token(cls, source):
+    def convert_to_4_digit_token(cls, source: int) -> int:
         restricted_digit_token = ""
         bit_array = cls._bit_array_from_int(source, 30)
         for i in range(15):
@@ -87,27 +88,27 @@ class OpenPAYGOTokenShared(object):
         return int(restricted_digit_token)
 
     @classmethod
-    def convert_from_4_digit_token(cls, source):
-        bit_array = []
+    def convert_from_4_digit_token(cls, source: Union[int, str]) -> int:
+        bit_array: List[bool] = []
         for digit in str(source):
-            digit = int(digit) - 1
-            this_array = cls._bit_array_from_int(digit, 2)
+            digit_int = int(digit) - 1
+            this_array = cls._bit_array_from_int(digit_int, 2)
             bit_array += this_array
         return cls._bit_array_to_int(bit_array)
 
     @classmethod
-    def generate_hash(cls, key, value):
+    def generate_hash(cls, key: bytes, value: bytes) -> int:
         return siphash.SipHash_2_4(key, value).hash()
 
     @classmethod
-    def _bit_array_to_int(cls, bit_array):
+    def _bit_array_to_int(cls, bit_array: List[bool]) -> int:
         integer = 0
         for bit in bit_array:
             integer = (integer << 1) | bit
         return integer
 
     @classmethod
-    def _bit_array_from_int(cls, source, bits):
+    def _bit_array_from_int(cls, source: int, bits: int) -> List[bool]:
         bit_array = []
         for i in range(bits):
             bit_array += [bool(source & (1 << (bits - 1 - i)))]
